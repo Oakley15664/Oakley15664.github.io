@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>露悠悠露營 · 出遊清單</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #fdf6f8; --surface: #ffffff; --surface2: #fce8ef;
+    --accent: #d4739a; --accent2: #e8a0be; --muted: #c4a0b0;
+    --text: #4a2e3a; --text2: #8a6070; --done: #f0d8e2; --done-text: #c4a0b0;
+    --campsite: #7aafd4; --campsite-bg: #eef4fb;
+    --transit: #c87e5a; --transit-bg: #fdf0eb;
+    --mrt: #9b7fc4; --mrt-bg: #f3eefb;
+  }
+  body {
+    background: var(--bg); font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif;
+    color: var(--text); min-height: 100vh; padding: 24px 16px 60px;
+    background-image:
+      radial-gradient(ellipse at 15% 10%, rgba(232,160,190,0.22) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 85%, rgba(200,126,90,0.1) 0%, transparent 45%);
+    max-width: 540px; margin: 0 auto;
+  }
+
+  /* ── HEADER ── */
+  .header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(212,115,154,0.2); }
+  .header .emoji { font-size: 2.2rem; margin-bottom: 6px; display: block; }
+  .header h1 { font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
+  .header .meta { color: var(--muted); font-size: 0.78rem; margin-top: 5px; letter-spacing: 0.08em; }
+  .progress-bar-wrap { background: var(--surface2); border-radius: 999px; height: 6px; margin: 14px auto 5px; max-width: 300px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; transition: width 0.4s ease; width: 0%; }
+  .progress-label { font-size: 0.75rem; color: var(--text2); text-align: center; }
+
+  /* ── TRANSIT CARD ── */
+  .transit-card {
+    background: var(--transit-bg); border: 1px solid rgba(200,126,90,0.3);
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+  }
+  .transit-card .tc-title {
+    font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; font-size: 0.92rem; font-weight: 700;
+    color: #a0582a; letter-spacing: 0.06em; margin-bottom: 14px;
+  }
+  .tc-steps { display: flex; flex-direction: column; gap: 0; }
+  .tc-step { display: flex; gap: 12px; align-items: stretch; }
+  .tc-left { display: flex; flex-direction: column; align-items: center; width: 22px; flex-shrink: 0; }
+  .tc-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--transit); flex-shrink: 0; margin-top: 4px; }
+  .tc-dot.green { background: var(--accent); }
+  .tc-dot.mrt { background: var(--mrt); }
+  .tc-connector { flex: 1; width: 2px; background: rgba(200,126,90,0.25); margin: 3px 0; min-height: 22px; }
+  .tc-connector.mrt { background: rgba(155,127,196,0.3); }
+  .tc-right { padding-bottom: 16px; flex: 1; }
+  .tc-right:last-child { padding-bottom: 0; }
+  .tc-time { font-size: 0.82rem; font-weight: 700; margin-bottom: 3px; color: #a0582a; }
+  .tc-time.mrt { color: #6a4fab; }
+  .tc-time.arrive { color: #b0446e; }
+  .tc-desc { color: #5a3a2a; font-size: 0.9rem; line-height: 1.65; font-weight: 400; }
+  .tc-desc strong { color: #3a1e10; font-weight: 600; }
+  .tc-desc .sub { font-size: 0.78rem; color: #8a6a5a; display: block; margin-top: 2px; line-height: 1.5; }
+  .tc-footer {
+    margin-top: 12px; padding-top: 9px;
+    border-top: 1px solid rgba(200,126,90,0.2);
+    font-size: 0.78rem; color: #a07060; font-weight: 500;
+  }
+
+  /* ── NOTICE BANNER ── */
+  .notice-banner {
+    background: var(--campsite-bg); border: 1px solid rgba(122,175,212,0.3);
+    border-radius: 12px; padding: 11px 14px; margin-bottom: 20px;
+    font-size: 0.77rem; color: var(--campsite); line-height: 1.7;
+  }
+  .notice-banner strong { font-weight: 600; display: block; margin-bottom: 3px; }
+
+  /* ── CHECKLIST ── */
+  .section { margin-bottom: 16px; }
+  .section-title {
+    font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; font-size: 0.83rem; font-weight: 600;
+    color: var(--accent); letter-spacing: 0.1em; padding: 8px 12px;
+    background: var(--surface2); border-radius: 8px 8px 0 0;
+    border-left: 3px solid var(--accent);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .count { margin-left: auto; font-size: 0.7rem; color: var(--muted); font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; font-weight: 400; }
+  .items { background: var(--surface); border-radius: 0 0 8px 8px; overflow: hidden; box-shadow: 0 1px 6px rgba(212,115,154,0.07); }
+  .item {
+    display: flex; align-items: center; gap: 11px; padding: 11px 13px;
+    cursor: pointer; transition: background 0.15s;
+    border-bottom: 1px solid rgba(212,115,154,0.08); user-select: none;
+  }
+  .item:last-child { border-bottom: none; }
+  .item:hover { background: #fff0f5; }
+  .item.checked { background: #fdf0f4; }
+  .checkbox {
+    width: 19px; height: 19px; border-radius: 5px; border: 2px solid var(--muted);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .item.checked .checkbox { background: var(--accent); border-color: var(--accent); }
+  .checkmark { display: none; color: #fff; font-size: 11px; font-weight: 700; }
+  .item.checked .checkmark { display: block; }
+  .item-label { font-size: 0.87rem; color: var(--text); flex: 1; line-height: 1.5; transition: color 0.2s; }
+  .item.checked .item-label { color: var(--done-text); text-decoration: line-through; text-decoration-color: var(--done); }
+  .tag { font-size: 0.63rem; padding: 2px 7px; border-radius: 999px; font-weight: 500; flex-shrink: 0; }
+  .tag-notice { background: rgba(200,126,90,0.12); color: var(--transit); }
+  .tag-provided { background: var(--campsite-bg); color: var(--campsite); border: 1px solid rgba(122,175,212,0.3); }
+  .tag-prep { background: rgba(212,115,154,0.1); color: var(--accent); }
+
+  /* ── CAMP SCHEDULE ── */
+  .schedule-card {
+    background: var(--campsite-bg); border: 1px solid rgba(122,175,212,0.35);
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 20px;
+  }
+  .schedule-card .sc-title {
+    font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; font-size: 0.92rem; font-weight: 700;
+    color: #3a6e9a; letter-spacing: 0.06em; margin-bottom: 14px;
+  }
+  .sc-day { font-size: 0.78rem; font-weight: 700; color: #5a7a9a; letter-spacing: 0.08em; margin: 12px 0 8px; padding: 4px 8px; background: rgba(122,175,212,0.15); border-radius: 4px; display: inline-block; }
+  .sc-day:first-child { margin-top: 0; }
+  .sc-row { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(122,175,212,0.15); font-size: 0.88rem; }
+  .sc-row:last-child { border-bottom: none; }
+  .sc-time { color: #2e6898; font-weight: 700; min-width: 100px; font-size: 0.82rem; flex-shrink: 0; }
+  .sc-label { color: #3a4a5a; flex: 1; line-height: 1.6; }
+  .sc-label strong { color: #1e2e3a; font-weight: 600; }
+  .sc-label span[style] { color: #6a8090 !important; }
+  .sc-tag { font-size: 0.65rem; padding: 2px 7px; border-radius: 999px; flex-shrink: 0; background: rgba(212,115,154,0.12); color: #b04070; font-weight: 600; }
+  .sc-tag.warn { background: rgba(200,126,90,0.15); color: #8a4020; font-weight: 600; }
+
+  .all-done { text-align: center; padding: 14px; font-size: 0.9rem; color: var(--accent); font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; display: none; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .reset-btn {
+    display: block; margin: 24px auto 0;
+    background: transparent; border: 1px solid var(--muted);
+    color: var(--muted); font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif;
+    font-size: 0.76rem; padding: 7px 18px; border-radius: 999px;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="emoji">🏕️</span>
+  <h1>露悠悠 · 出遊清單</h1>
+  <div class="meta">2026 FEB · 行李 & 行前準備</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+  <div class="progress-label" id="plabel">0 / 0 完成</div>
+</div>
+
+<!-- 交通計劃 -->
+<div class="transit-card">
+  <div class="tc-title">🚌 禮拜六交通計劃｜東海大學 → 台中高鐵 11:00 集合</div>
+  <div class="tc-steps">
+
+    <div class="tc-step">
+      <div class="tc-left">
+        <div class="tc-dot"></div>
+        <div class="tc-connector"></div>
+      </div>
+      <div class="tc-right">
+        <div class="tc-time">09:20 出發</div>
+        <div class="tc-desc">🏫 從<strong>東海大學</strong>步行至台灣大道站牌
+          <span class="sub">搭乘 300 系列優化公車（往市政府方向），車程約 20 分鐘</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-step">
+      <div class="tc-left">
+        <div class="tc-dot mrt"></div>
+        <div class="tc-connector mrt"></div>
+      </div>
+      <div class="tc-right">
+        <div class="tc-time mrt">約 09:45 抵達</div>
+        <div class="tc-desc">🟢 在<strong>市政府站</strong>下公車，轉搭台中捷運綠線
+          <span class="sub">往「高鐵台中站」方向搭乘，共 9 站，約 19 分鐘</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tc-step">
+      <div class="tc-left">
+        <div class="tc-dot green"></div>
+      </div>
+      <div class="tc-right">
+        <div class="tc-time arrive">11:00 🎯 集合</div>
+        <div class="tc-desc">🚄 抵達<strong>高鐵台中站</strong>，與大家集合！
+          <span class="sub">建議 10:45 前到，預留緩衝時間</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="tc-footer">⚠ 建議 9:20 準時出發｜悠遊卡/一卡通可刷公車及捷運</div>
+</div>
+
+<!-- 營區行程時刻表 -->
+<div class="schedule-card">
+  <div class="sc-title">🗓️ 露悠悠 · 行程時刻表</div>
+
+  <div class="sc-day">Day 1 · 入住日</div>
+  <div class="sc-row">
+    <span class="sc-time">15:00</span>
+    <span class="sc-label"><strong>Check In</strong></span>
+  </div>
+  <div class="sc-row">
+    <span class="sc-time">15:30 ~ 16:30</span>
+    <span class="sc-label"><strong>手作課程</strong></span>
+    <span class="sc-tag warn">需提前報名</span>
+  </div>
+  <div class="sc-row">
+    <span class="sc-time">18:00 ~ 20:00</span>
+    <span class="sc-label"><strong>晚餐</strong> · 黑瓷火鍋爐 + 鑄鐵燒烤盤<br>
+      <span style="font-size:0.72rem;opacity:0.7">松阪豬、豬五花、雞腿、雞胸、香腸、培根、時蔬、火鍋料（4人共鍋）</span>
+    </span>
+  </div>
+  <div class="sc-row">
+    <span class="sc-time">19:00 ~ 23:00</span>
+    <span class="sc-label"><strong>酒吧 / 消夜</strong> · 炸物、牛肉麵、排骨麵、小菜等<br>
+      <span style="font-size:0.72rem;opacity:0.7">22:00 前可向工作人員借卡式爐</span>
+    </span>
+  </div>
+  <div class="sc-row">
+    <span class="sc-time">22:00</span>
+    <span class="sc-label"><strong>設施使用結束</strong>，音量管制開始</span>
+    <span class="sc-tag warn">降低聲量</span>
+  </div>
+
+  <div class="sc-day">Day 2 · 退房日</div>
+  <div class="sc-row">
+    <span class="sc-time">08:00 ~ 10:00</span>
+    <span class="sc-label"><strong>早餐</strong> · 中西式百匯自助餐<br>
+      <span style="font-size:0.72rem;opacity:0.7">清粥、炒蛋、麵包吐司、炸物、咖啡、果汁等｜同時可使用遊樂設施</span>
+    </span>
+  </div>
+  <div class="sc-row">
+    <span class="sc-time">11:00</span>
+    <span class="sc-label"><strong>Check Out</strong></span>
+    <span class="sc-tag warn">準時退房</span>
+  </div>
+
+  <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(122,175,212,0.15);font-size:0.72rem;color:rgba(122,175,212,0.7)">
+    ⚠ 18:00 前未完成入住請提前聯繫，否則費用照收不退｜客服：063128846
+  </div>
+</div>
+
+<div class="notice-banner">
+  <strong>⛺ 露悠悠已提供</strong>
+  寢具、冷暖氣機、吹風機、洗髮精、沐浴乳、浴巾、滅蚊燈、蚊香、熱水、公共冰箱
+  <span style="color:var(--campsite);opacity:0.7;font-size:0.72rem;margin-top:4px;display:block">✔ 打「已提供」標籤的可不帶</span>
+</div>
+
+<div id="checklist"></div>
+<div class="all-done" id="allDone">🎉 全部打包完畢，出發吧！</div>
+<button class="reset-btn" onclick="resetAll()">重置清單</button>
+
+<script>
+const sections = [
+  { icon: "⚡", title: "行前準備", items: [
+    { label: "手錶充電", tag: "prep" },
+    { label: "行動電源充電", tag: "prep" },
+    { label: "手機充電器充電", tag: "prep" },
+    { label: "查詢 300 系列公車時刻（週六班次）", tag: "prep" },
+  ]},
+  { icon: "👚", title: "衣物", items: [
+    { label: "第二天要穿的衣服" },
+    { label: "襪子 / 內衣褲" },
+    { label: "睡衣（長褲 + 短袖 + 毛茸茸長袖外套）" },
+    { label: "拖鞋" },
+    { label: "保暖衣物（山區早晚溫差大！）", tag: "notice" },
+    { label: "雨具 / 雨鞋（以防萬一）", tag: "notice" },
+  ]},
+  { icon: "🧴", title: "盥洗 & 美妝", items: [
+    { label: "牙刷 / 牙膏（沒帶可至櫃檯免費領）", tag: "provided" },
+    { label: "洗面乳" },
+    { label: "護髮素 / 潤絲" },
+    { label: "卸妝棉" },
+    { label: "底妝" },
+    { label: "電棒捲" },
+    { label: "芳香劑" },
+    { label: "防曬用品", tag: "notice" },
+    { label: "防蚊液（蚊蟲過敏者必備！）", tag: "notice" },
+    { label: "口罩" },
+  ]},
+  { icon: "🛁", title: "毛巾", items: [
+    { label: "小毛巾（擦頭髮用）" },
+    { label: "擦身體的毛巾" },
+    { label: "戲水毛巾（若有玩水）" },
+    { label: "浴巾", tag: "provided" },
+  ]},
+  { icon: "🔋", title: "3C & 雜物", items: [
+    { label: "手機充電器" },
+    { label: "行動電源" },
+    { label: "眼罩 / 蓋眼睛的衣服（帳篷無隔光）" },
+    { label: "衛生棉" },
+    { label: "溫水保溫壺" },
+  ]},
+];
+
+const STORAGE_KEY = 'luyouyou_checklist_v1';
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+}
+
+let state = loadState();
+
+function getKey(si, ii) { return `s${si}_i${ii}`; }
+
+function render() {
+  const container = document.getElementById('checklist');
+  container.innerHTML = '';
+  sections.forEach((sec, si) => {
+    const div = document.createElement('div');
+    div.className = 'section';
+    let itemsHtml = sec.items.map((item, ii) => {
+      const key = getKey(si, ii);
+      const checked = state[key] ? 'checked' : '';
+      let tagHtml = '';
+      if (item.tag === 'notice') tagHtml = '<span class="tag tag-notice">⚠ 注意</span>';
+      else if (item.tag === 'provided') tagHtml = '<span class="tag tag-provided">✔ 已提供</span>';
+      else if (item.tag === 'prep') tagHtml = '<span class="tag tag-prep">行前</span>';
+      return `<div class="item ${checked}" onclick="toggle('${key}')">
+        <div class="checkbox"><span class="checkmark">✓</span></div>
+        <span class="item-label">${item.label}</span>${tagHtml}
+      </div>`;
+    }).join('');
+    const checkedCount = sec.items.filter((_, ii) => state[getKey(si, ii)]).length;
+    div.innerHTML = `
+      <div class="section-title"><span>${sec.icon} ${sec.title}</span><span class="count">${checkedCount} / ${sec.items.length}</span></div>
+      <div class="items">${itemsHtml}</div>`;
+    container.appendChild(div);
+  });
+  updateProgress();
+}
+
+function toggle(key) {
+  state[key] = !state[key];
+  saveState();
+  render();
+}
+
+function updateProgress() {
+  let total = 0, done = 0;
+  sections.forEach((sec, si) => { sec.items.forEach((_, ii) => { total++; if (state[getKey(si, ii)]) done++; }); });
+  const pct = total ? (done / total * 100) : 0;
+  document.getElementById('pbar').style.width = pct + '%';
+  document.getElementById('plabel').textContent = `${done} / ${total} 完成`;
+  document.getElementById('allDone').style.display = done === total && total > 0 ? 'block' : 'none';
+}
+
+function resetAll() {
+  state = {};
+  saveState();
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
