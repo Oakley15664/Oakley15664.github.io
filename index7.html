@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>工配丙級第一題 - 完整配線練習</title>
+    <style>
+        body { background-color: #f5f5dc; color: #3e2723; margin: 0; font-family: "Microsoft JhengHei", sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: #d7ccc8; padding: 10px; text-align: center; border-bottom: 3px solid #8d6e63; }
+        .main-container { display: flex; flex: 1; justify-content: center; align-items: center; overflow: hidden; position: relative; }
+        canvas { background-color: #e0e0e0; border: 10px solid #795548; cursor: crosshair; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .legend { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 5px; font-size: 12px; border: 1px solid #8d6e63; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <strong>工業配線丙級 第01題：單相感應電動機順序起動控制 (完整元件版)</strong>
+    <button onclick="reset()" style="margin-left:20px; cursor:pointer;">重置線路 (R)</button>
+</div>
+
+<div class="main-container">
+    <canvas id="canvas" width="1350" height="850"></canvas>
+    <div class="legend">
+        <b>操作提示：</b><br>
+        1. 門板線路必須經過 TB 端子。<br>
+        2. 按【空白鍵】取消拉線。<br>
+        3. 按【R】鍵清空。
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+let connections = [];
+let activePin = null;
+let mouse = { x: 0, y: 0 };
+
+// --- 根據 PDF 第 18 頁材料表配置 ---
+const components = [
+    // --- 區塊 1：門板 (按鈕、燈、開關) ---
+    { name: "COS1 (切換)", x: 60, y: 80, w: 90, h: 90, color: "#222", pins: [{id:"1",x:85,y:125},{id:"2",x:125,y:125},{id:"3",x:85,y:155},{id:"4",x:125,y:155}] },
+    { name: "PB1 (啟動a)", x: 200, y: 80, w: 80, h: 80, color: "#2e7d32", isRound:true, pins: [{id:"13",x:220,y:120},{id:"14",x:260,y:120}] },
+    { name: "PB2 (停止b/啟動a)", x: 60, y: 220, w: 80, h: 80, color: "#c62828", isRound:true, pins: [{id:"1",x:80,y:250},{id:"2",x:120,y:250},{id:"3",x:80,y:280},{id:"4",x:120,y:280}] },
+    { name: "PB3 (停止b/啟動a)", x: 200, y: 220, w: 80, h: 80, color: "#c62828", isRound:true, pins: [{id:"1",x:220,y:250},{id:"2",x:260,y:250},{id:"3",x:220,y:280},{id:"4",x:260,y:280}] },
+    { name: "PL1 (M2燈)", x: 60, y: 360, w: 65, h: 65, color: "#fbc02d", isRound:true, pins: [{id:"X1",x:75,y:390},{id:"X2",x:110,y:390}] },
+    { name: "PL2 (M3燈)", x: 150, y: 360, w: 65, h: 65, color: "#fbc02d", isRound:true, pins: [{id:"X1",x:165,y:390},{id:"X2",x:200,y:390}] },
+    { name: "PL3 (M4燈)", x: 240, y: 360, w: 65, h: 65, color: "#fbc02d", isRound:true, pins: [{id:"X1",x:255,y:390},{id:"X2",x:290,y:390}] },
+    { name: "BZ (蜂鳴器)", x: 150, y: 460, w: 70, h: 70, color: "#000", isRound:true, pins: [{id:"1",x:170,y:495},{id:"2",x:200,y:495}] },
+
+    // --- 區塊 2：過門端子台 ---
+    ...createTB(420, 50, 24),
+
+    // --- 區塊 3：底板 (控制器具) ---
+    { name: "NFB (主開關)", x: 550, y: 60, w: 80, h: 150, color: "#111", pins: [{id:"L1",x:570,y:80},{id:"L2",x:610,y:80},{id:"T1",x:570,y:190},{id:"T2",x:610,y:190}] },
+    { name: "F1 (保險絲)", x: 660, y: 60, w: 45, h: 90, color: "#5d4037", pins: [{id:"1",x:682,y:75},{id:"2",x:682,y:135}] },
+    { name: "F2 (保險絲)", x: 720, y: 60, w: 45, h: 90, color: "#5d4037", pins: [{id:"1",x:742,y:75},{id:"2",x:742,y:135}] },
+    ...createSocket("R1 (Relay)", 800, 60, "#333"),
+    ...createSocket("T1 (Timer)", 930, 60, "#2c3e50"),
+    ...createSocket("T2 (Timer)", 1060, 60, "#2c3e50"),
+    ...createSocket("T3 (Timer)", 1190, 60, "#2c3e50"),
+
+    ...createMC("MC1", 550, 300),
+    ...createMC("MC2", 730, 300),
+    ...createMC("MC3", 910, 300),
+    ...createMC("MC4", 1090, 300),
+
+    { name: "TH-RY (過載)", x: 550, y: 520, w: 120, h: 90, color: "#bf360c", pins: [{id:"95",x:580,y:580},{id:"96",x:640,y:580}] },
+    { name: "LS1 (開關)", x: 730, y: 540, w: 100, h: 60, color: "#546e7a", pins: [{id:"COM",x:750,y:570},{id:"NO",x:810,y:570}] },
+    { name: "LS2 (開關)", x: 880, y: 540, w: 100, h: 60, color: "#546e7a", pins: [{id:"COM",x:900,y:570},{id:"NO",x:960,y:570}] }
+];
+
+function createTB(x, y, count) {
+    const pins = [];
+    for (let i = 0; i < count; i++) {
+        pins.push({ id: (i + 1).toString(), x: x + 25, y: y + 25 + (i * 30) });
+    }
+    return [{ name: "過門端子台", x, y, w: 50, h: count * 30 + 20, color: "#616161", pins }];
+}
+
+function createSocket(name, x, y, color) {
+    const pins = [];
+    for (let i = 0; i < 8; i++) {
+        const ang = (Math.PI / 4) * i + (Math.PI * 0.65);
+        pins.push({ id: (i+1).toString(), x: Math.cos(ang)*35 + x + 50, y: Math.sin(ang)*35 + y + 55 });
+    }
+    return [{ name, x, y, w: 100, h: 110, color, pins }];
+}
+
+function createMC(name, x, y) {
+    return [{ name, x, y, w: 140, h: 180, color: "#37474f", pins: [
+        {id:"A1",x:x+35,y:y+25},{id:"A2",x:x+105,y:y+25},
+        {id:"13",x:x+35,y:y+65},{id:"14",x:x+105,y:y+65},
+        {id:"L1",x:x+30,y:y+115},{id:"L2",x:x+70,y:y+115},{id:"L3",x:x+110,y:y+115},
+        {id:"T1",x:x+30,y:y+155},{id:"T2",x:x+70,y:y+155},{id:"T3",x:x+110,y:y+155}
+    ]}];
+}
+
+// --- 繪圖邏輯 ---
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 繪製背景分區
+    ctx.fillStyle = "#efebe9"; ctx.fillRect(0,0,380,canvas.height);
+    ctx.setLineDash([5, 5]); ctx.strokeStyle = "#8d6e63";
+    ctx.beginPath(); ctx.moveTo(400,0); ctx.lineTo(400,canvas.height); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(500,0); ctx.lineTo(500,canvas.height); ctx.stroke();
+    ctx.setLineDash([]);
+
+    components.forEach(c => {
+        ctx.save();
+        ctx.shadowBlur = 5; ctx.shadowColor = "rgba(0,0,0,0.3)";
+        ctx.fillStyle = c.color;
+        if(c.isRound) {
+            ctx.beginPath(); ctx.arc(c.x+c.w/2, c.y+c.h/2, c.w/2, 0, Math.PI*2); ctx.fill();
+        } else {
+            ctx.fillRect(c.x, c.y, c.w, c.h);
+        }
+        ctx.shadowBlur = 0; ctx.fillStyle = "#5d4037"; ctx.font = "bold 12px sans-serif";
+        ctx.fillText(c.name, c.x, c.y - 10);
+        
+        c.pins.forEach(p => {
+            ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2);
+            ctx.fillStyle = "#212121"; ctx.fill();
+            ctx.strokeStyle = "#fff"; ctx.stroke();
+            ctx.fillStyle = "#fff"; ctx.font = "bold 9px Arial";
+            ctx.fillText(p.id, p.x-4, p.y-12);
+        });
+        ctx.restore();
+    });
+
+    connections.forEach(conn => {
+        ctx.beginPath(); ctx.moveTo(conn.p1.x, conn.p1.y);
+        let drop = Math.abs(conn.p1.x - conn.p2.x) * 0.1 + 40;
+        ctx.bezierCurveTo(conn.p1.x, conn.p1.y+drop, conn.p2.x, conn.p2.y+drop, conn.p2.x, conn.p2.y);
+        ctx.strokeStyle = "#000"; ctx.lineWidth = 4; ctx.stroke();
+        ctx.fillStyle = "#ffeb3b"; ctx.beginPath(); ctx.arc(conn.p1.x, conn.p1.y, 3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(conn.p2.x, conn.p2.y, 3, 0, Math.PI*2); ctx.fill();
+    });
+
+    if (activePin) {
+        ctx.beginPath(); ctx.moveTo(activePin.x, activePin.y); ctx.lineTo(mouse.x, mouse.y);
+        ctx.strokeStyle = "rgba(0,0,0,0.4)"; ctx.lineWidth = 2; ctx.stroke();
+    }
+    requestAnimationFrame(draw);
+}
+
+// --- 事件處理 ---
+canvas.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;
+});
+
+canvas.addEventListener('mousedown', () => {
+    let hit = null;
+    components.forEach(c => { if(c.pins) c.pins.forEach(p => {
+        if (Math.hypot(p.x - mouse.x, p.y - mouse.y) < 15) hit = p;
+    })});
+    if (hit) {
+        if (!activePin) activePin = hit;
+        else {
+            if (activePin !== hit) connections.push({ p1: {x:activePin.x, y:activePin.y}, p2: {x:hit.x, y:hit.y} });
+            activePin = null;
+        }
+    }
+});
+
+window.addEventListener('keydown', e => { if(e.key==='r') reset(); if(e.code==='Space') activePin=null; });
+function reset() { connections = []; activePin = null; }
+draw();
+</script>
+</body>
+</html>
