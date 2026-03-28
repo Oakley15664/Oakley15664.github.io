@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四月排班表 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:        #8CABD9;
+    --blue-dark:   #5e82b8;
+    --blue-light:  #dce9f7;
+    --navy:        #1D4D9F;
+    --pink:        #F6A7B8;
+    --pink-light:  #fde8ef;
+    --yellow:      #F1EC7A;
+    --yellow-light:#fdfbe6;
+    --orange:      #F08838;
+    --orange-light:#fef0e2;
+    --cream:       #fafaf7;
+    --cream-dark:  #f0ece4;
+    --border:      #c8d8ee;
+    --gray:        #7a8eac;
+    --white:       #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--cream);
+    color: var(--navy);
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+  }
+
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+  .title-main { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); }
+  .title-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--blue-dark); letter-spacing: 2px; margin-top: 3px; }
+  .name-block { display: flex; align-items: center; gap: 10px; background: var(--blue); color: var(--navy); border-radius: 8px; padding: 8px 18px; border: 1.5px solid var(--blue-dark); }
+  .name-label { font-size: 10px; opacity: 0.65; letter-spacing: 1px; font-weight: 700; }
+  .name-input { background: transparent; border: none; color: var(--navy); font-family: 'Noto Sans TC', sans-serif; font-size: 14px; font-weight: 700; outline: none; width: 110px; border-bottom: 1.5px solid rgba(29,77,159,0.35); }
+  .name-input::placeholder { color: rgba(29,77,159,0.4); }
+
+  .stats-bar { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+  .stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 10px 20px; min-width: 120px; box-shadow: 0 2px 8px rgba(140,171,217,0.15); }
+  .stat-label { font-size: 10px; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; }
+  .stat-value { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; color: var(--navy); margin-top: 2px; }
+  .stat-card.accent .stat-value { color: var(--orange); }
+
+  .week-block { background: var(--white); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; box-shadow: 0 3px 18px rgba(140,171,217,0.18); }
+
+  .sg { display: grid; grid-template-columns: 76px repeat(10, 1fr) 58px 68px; }
+
+  .cell { padding: 6px 3px; text-align: center; font-size: 11px; display: flex; align-items: center; justify-content: center; min-height: 30px; border-right: 1px solid rgba(140,171,217,0.35); border-bottom: 1px solid rgba(140,171,217,0.2); }
+  .cell:last-child { border-right: none; }
+  .no-bb { border-bottom: none; }
+
+  .r-dates { background: var(--blue); }
+  .c-week-label { font-size: 11px; font-weight: 700; color: var(--navy); letter-spacing: 0.5px; }
+  .c-date { grid-column: span 2; font-size: 11px; font-weight: 700; color: var(--navy); line-height: 1.5; }
+  .c-date .wd { font-size: 9px; opacity: 0.6; display: block; }
+  .c-date.hol { background: var(--pink-light) !important; color: #b03060 !important; }
+  .c-date.hol .wd { opacity: 0.75; }
+  .c-date.emp { background: rgba(255,255,255,0.2); color: rgba(29,77,159,0.2); }
+  .c-sum-hdr { font-size: 9px; font-weight: 700; color: var(--navy); background: var(--yellow); line-height: 1.5; letter-spacing: 0.3px; }
+
+  .r-slots { background: var(--blue-light); }
+  .c-slot-lbl { font-size: 10px; font-weight: 700; color: var(--navy); }
+  .c-slot { font-size: 11px; font-weight: 700; color: var(--navy); }
+  .c-slot.hol { background: var(--pink-light); color: #b03060; }
+  .c-slot.emp { background: rgba(255,255,255,0.5); color: rgba(29,77,159,0.15); }
+  .c-sum-slot { background: #d4e3f5; }
+
+  .r-times { background: #edf4fb; border-bottom: 2px solid var(--border); }
+  .c-time-lbl { font-size: 10px; font-weight: 700; color: var(--navy); }
+  .c-time { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--navy); opacity: 0.55; }
+  .c-time.noon { opacity: 1; color: var(--navy); font-weight: 700; }
+  .c-time.hol { color: #b03060; opacity: 1; font-weight: 400; }
+  .c-time.hol.noon { color: #b03060; font-weight: 700; }
+  .c-time.emp { opacity: 0; background: rgba(200,215,240,0.15); }
+  .c-sum-time { background: #edf4fb; }
+
+  .r-person { background: var(--cream); }
+  .c-person-lbl { font-size: 12px; font-weight: 700; color: var(--navy); background: var(--yellow-light); border-right: 1px solid var(--border); }
+  .att { cursor: pointer; font-size: 14px; font-weight: 700; transition: all 0.12s; user-select: none; min-height: 38px; }
+  .att:hover { filter: brightness(0.92); transform: scale(0.95); }
+  .att.on  { background: var(--yellow-light); color: #7a6e00; }
+  .att.off { background: #f8f8f8; color: #ccc; }
+  .att.hol { background: var(--pink-light); color: #f0b8c4; cursor: not-allowed; }
+  .att.hol:hover, .att.emp:hover { transform: none; filter: none; }
+  .att.emp { background: #f2f2f2; color: transparent; cursor: not-allowed; }
+  .c-wk-total { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 600; color: var(--navy); background: var(--yellow-light); }
+  .c-mo-total { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 700; color: var(--white); background: var(--orange); }
+
+  .legend { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-top: 20px; font-size: 11px; color: var(--gray); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .ldot { width: 13px; height: 13px; border-radius: 3px; }
+  .print-btn { background: var(--orange); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-family: 'Noto Sans TC', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+  .print-btn:hover { background: #d0701e; }
+  @media print { body { padding: 8px; background: #fff; } .print-btn { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="title-main">四月排班表</div>
+    <div class="title-sub">APRIL · 2026</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <div class="name-block">
+      <span class="name-label">姓名</span>
+      <input class="name-input" id="nameInput" placeholder="輸入名字">
+    </div>
+    <button class="print-btn" onclick="window.print()">🖨 列印</button>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-card"><div class="stat-label">已出勤場次</div><div class="stat-value" id="statPresent">0</div></div>
+  <div class="stat-card accent"><div class="stat-label">本月累積時數</div><div class="stat-value" id="statHours">0</div></div>
+  <div class="stat-card"><div class="stat-label">可出勤上班日</div><div class="stat-value">18</div></div>
+</div>
+
+<div id="scheduleContainer"></div>
+
+<div class="legend">
+  <span>點擊格子切換：</span>
+  <div class="legend-item"><div class="ldot" style="background:#fdfbe6;border:1px solid #d4ce50;"></div>1 = 出勤</div>
+  <div class="legend-item"><div class="ldot" style="background:#f8f8f8;border:1px solid #ddd;"></div>X = 未出勤</div>
+  <div class="legend-item"><div class="ldot" style="background:#fde8ef;border:1px solid #f6a7b8;"></div>假日</div>
+  <div class="legend-item"><div class="ldot" style="background:#f2f2f2;border:1px solid #ddd;"></div>空白</div>
+</div>
+
+<script>
+const HOLIDAYS = { 1:'溫書假', 2:'調整放假', 3:'兒童節補假', 6:'掃墓節補假' };
+const SLOTS = [
+  { name:'早上', time:'7:00-8:00',    noon: false },
+  { name:'中午', time:'12:20-13:20',  noon: true  }
+];
+const WD_NAMES = ['(一)','(二)','(三)','(四)','(五)'];
+
+function buildWeeks() {
+  const weeks = [];
+  let week = Array(5).fill(null), started = false;
+  for (let d = 1; d <= 30; d++) {
+    const wd = new Date(2026, 3, d).getDay();
+    if (wd === 0 || wd === 6) continue;
+    const idx = wd - 1;
+    if (idx === 0 && started) { weeks.push(week); week = Array(5).fill(null); }
+    week[idx] = d;
+    started = true;
+  }
+  if (week.some(v => v !== null)) weeks.push(week);
+  return weeks;
+}
+
+const weeks = buildWeeks();
+const WEEK_NAMES = ['一','二','三','四','五'];
+const state = weeks.map(wk => wk.map(() => [false, false]));
+
+function mk(tag, cls, html) {
+  const el = document.createElement(tag);
+  el.className = cls;
+  if (html !== undefined) el.innerHTML = html;
+  return el;
+}
+
+function render() {
+  const container = document.getElementById('scheduleContainer');
+  container.innerHTML = '';
+  const name = document.getElementById('nameInput').value || '（你的名字）';
+  let cumTotal = 0;
+
+  weeks.forEach((week, wi) => {
+    const block = document.createElement('div');
+    block.className = 'week-block';
+
+    const r1 = mk('div', 'sg r-dates');
+    r1.appendChild(mk('div', 'cell c-week-label', `第${WEEK_NAMES[wi]}週`));
+    week.forEach((day, di) => {
+      const isEmpty = day === null, isHol = !isEmpty && !!HOLIDAYS[day];
+      const cls = 'cell c-date' + (isEmpty ? ' emp' : isHol ? ' hol' : '');
+      const html = isEmpty ? '' : `4/${day}<span class="wd">${WD_NAMES[di]}${isHol ? ' · '+HOLIDAYS[day] : ''}</span>`;
+      const c = mk('div', cls, html);
+      c.style.gridColumn = 'span 2';
+      r1.appendChild(c);
+    });
+    r1.appendChild(mk('div', 'cell c-sum-hdr', '本週<br>時數'));
+    r1.appendChild(mk('div', 'cell c-sum-hdr', '本月累積<br>時數'));
+    block.appendChild(r1);
+
+    const r2 = mk('div', 'sg r-slots');
+    r2.appendChild(mk('div', 'cell c-slot-lbl', '服務時段'));
+    week.forEach((day) => {
+      const isEmpty = day === null, isHol = !isEmpty && !!HOLIDAYS[day];
+      SLOTS.forEach(s => {
+        r2.appendChild(mk('div', 'cell c-slot'+(isEmpty?' emp':isHol?' hol':''), isEmpty?'':s.name));
+      });
+    });
+    r2.appendChild(mk('div', 'cell c-sum-slot'));
+    r2.appendChild(mk('div', 'cell c-sum-slot'));
+    block.appendChild(r2);
+
+    const r3 = mk('div', 'sg r-times');
+    r3.appendChild(mk('div', 'cell c-time-lbl', '服務時間'));
+    week.forEach((day) => {
+      const isEmpty = day === null, isHol = !isEmpty && !!HOLIDAYS[day];
+      SLOTS.forEach(s => {
+        let cls = 'cell c-time';
+        if (isEmpty) cls += ' emp';
+        else if (isHol) cls += ' hol' + (s.noon ? ' noon' : '');
+        else if (s.noon) cls += ' noon';
+        r3.appendChild(mk('div', cls, isEmpty ? '' : s.time));
+      });
+    });
+    r3.appendChild(mk('div', 'cell c-sum-time'));
+    r3.appendChild(mk('div', 'cell c-sum-time'));
+    block.appendChild(r3);
+
+    const r4 = mk('div', 'sg r-person');
+    r4.appendChild(mk('div', 'cell c-person-lbl name-cell', name));
+    let wkCount = 0;
+    week.forEach((day, di) => {
+      const isEmpty = day === null, isHol = !isEmpty && !!HOLIDAYS[day];
+      SLOTS.forEach((_, si) => {
+        const c = document.createElement('div');
+        if (isEmpty) {
+          c.className = 'cell att emp';
+        } else if (isHol) {
+          c.className = 'cell att hol';
+        } else {
+          const on = state[wi][di][si];
+          c.className = 'cell att ' + (on ? 'on' : 'off');
+          c.textContent = on ? '1' : 'X';
+          if (on) wkCount++;
+          c.addEventListener('click', () => { state[wi][di][si] = !state[wi][di][si]; render(); });
+        }
+        r4.appendChild(c);
+      });
+    });
+    cumTotal += wkCount;
+
+    r4.appendChild(mk('div', 'cell c-wk-total no-bb', wkCount));
+    r4.appendChild(mk('div', 'cell c-mo-total no-bb', cumTotal));
+    block.appendChild(r4);
+    container.appendChild(block);
+  });
+
+  let total = 0;
+  weeks.forEach((wk, wi) => wk.forEach((day, di) => {
+    if (day && !HOLIDAYS[day]) SLOTS.forEach((_, si) => { if (state[wi][di][si]) total++; });
+  }));
+  document.getElementById('statPresent').textContent = total;
+  document.getElementById('statHours').textContent = total;
+}
+
+document.getElementById('nameInput').addEventListener('input', () => {
+  const n = document.getElementById('nameInput').value || '（你的名字）';
+  document.querySelectorAll('.name-cell').forEach(el => el.textContent = n);
+});
+
+render();
+</script>
+</body>
+</html>
