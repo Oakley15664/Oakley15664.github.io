@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>露悠悠露營 · 出遊清單</title>
 <style>
+  /* 基礎樣式保持不變 */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --bg: #fdf6f8; --surface: #ffffff; --surface2: #fce8ef;
@@ -28,6 +29,7 @@
   .header .emoji { font-size: 2.2rem; margin-bottom: 6px; display: block; }
   .header h1 { font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; }
   .header .meta { color: var(--muted); font-size: 0.78rem; margin-top: 5px; letter-spacing: 0.08em; }
+  .header .date-badge { display: inline-block; background: var(--accent); color: white; padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; margin-top: 8px; font-weight: 600; }
   .progress-bar-wrap { background: var(--surface2); border-radius: 999px; height: 6px; margin: 14px auto 5px; max-width: 300px; overflow: hidden; }
   .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; transition: width 0.4s ease; width: 0%; }
   .progress-label { font-size: 0.75rem; color: var(--text2); text-align: center; }
@@ -113,7 +115,7 @@
     font-family: 'Microsoft JhengHei', '微軟正黑體', 'PingFang TC', sans-serif; font-size: 0.92rem; font-weight: 700;
     color: #3a6e9a; letter-spacing: 0.06em; margin-bottom: 14px;
   }
-  .sc-day { font-size: 0.78rem; font-weight: 700; color: #5a7a9a; letter-spacing: 0.08em; margin: 12px 0 8px; padding: 4px 8px; background: rgba(122,175,212,0.15); border-radius: 4px; display: inline-block; }
+  .sc-day { font-size: 0.78rem; font-weight: 700; color: #5a7a9a; letter-spacing: 0.08em; margin: 12px 0 8px; padding: 4px 10px; background: rgba(122,175,212,0.15); border-radius: 4px; display: inline-block; }
   .sc-day:first-child { margin-top: 0; }
   .sc-row { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(122,175,212,0.15); font-size: 0.88rem; }
   .sc-row:last-child { border-bottom: none; }
@@ -141,14 +143,14 @@
 <div class="header">
   <span class="emoji">🏕️</span>
   <h1>露悠悠 · 出遊清單</h1>
-  <div class="meta">2026 FEB · 行李 & 行前準備</div>
+  <div class="meta">2026 行李 & 行前準備</div>
+  <div class="date-badge">3/29 Sun - 3/30 Mon</div>
   <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
   <div class="progress-label" id="plabel">0 / 0 完成</div>
 </div>
 
-<!-- 交通計劃 -->
 <div class="transit-card">
-  <div class="tc-title">🚌 禮拜六交通計劃｜東海大學 → 台中高鐵 11:00 集合</div>
+  <div class="tc-title">🚌 3/29 (Sun) 交通計劃｜東海大學 → 台中高鐵 11:00 集合</div>
   <div class="tc-steps">
 
     <div class="tc-step">
@@ -193,11 +195,10 @@
   <div class="tc-footer">⚠ 建議 9:20 準時出發｜悠遊卡/一卡通可刷公車及捷運</div>
 </div>
 
-<!-- 營區行程時刻表 -->
 <div class="schedule-card">
   <div class="sc-title">🗓️ 露悠悠 · 行程時刻表</div>
 
-  <div class="sc-day">Day 1 · 入住日</div>
+  <div class="sc-day">3/29 (Sun) Day 1 · 入住</div>
   <div class="sc-row">
     <span class="sc-time">15:00</span>
     <span class="sc-label"><strong>Check In</strong></span>
@@ -225,7 +226,7 @@
     <span class="sc-tag warn">降低聲量</span>
   </div>
 
-  <div class="sc-day">Day 2 · 退房日</div>
+  <div class="sc-day">3/30 (Mon) Day 2 · 退房</div>
   <div class="sc-row">
     <span class="sc-time">08:00 ~ 10:00</span>
     <span class="sc-label"><strong>早餐</strong> · 中西式百匯自助餐<br>
@@ -254,12 +255,13 @@
 <button class="reset-btn" onclick="resetAll()">重置清單</button>
 
 <script>
+// JavaScript 邏輯保持不變
 const sections = [
   { icon: "⚡", title: "行前準備", items: [
     { label: "手錶充電", tag: "prep" },
     { label: "行動電源充電", tag: "prep" },
     { label: "手機充電器充電", tag: "prep" },
-    { label: "查詢 300 系列公車時刻（週六班次）", tag: "prep" },
+    { label: "查詢 300 系列公車時刻（週日班次）", tag: "prep" },
   ]},
   { icon: "👚", title: "衣物", items: [
     { label: "第二天要穿的衣服" },
