@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>極簡定時倒數器 - 特大字體版</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;600&family=IBM+Plex+Sans:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: #ffffff;
+      color: #111;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 1. 放大容器寬度，避免大字換行 */
+    .root {
+      width: 100%;
+      max-width: 550px;
+      padding: 2rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: #f3f3f3;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 2rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #888;
+      border: none;
+      background: none;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: #fff;
+      color: #111;
+      border: 0.5px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    /* 2. 現在時間放大 */
+    .current-time {
+      text-align: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 24px;
+      color: #888;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .current-time span {
+      color: #1D9E75;
+      font-weight: 600;
+      font-size: 32px;
+    }
+
+    /* 3. 倒數大字特大化 & 防止換行 */
+    .time-display {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 110px;
+      font-weight: 300;
+      letter-spacing: -6px;
+      text-align: center;
+      color: #111;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      transition: color 0.4s;
+    }
+
+    .time-display.running {
+      color: #1D9E75;
+    }
+
+    .time-display.done {
+      color: #E24B4A;
+    }
+
+    .sub { 
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #aaa;
+      margin-bottom: 2rem;
+      font-family: 'IBM Plex Mono', monospace;
+      text-transform: uppercase;
+      min-height: 18px;
+    }
+
+    .track {
+      height: 3px;
+      background: #eee;
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 100%;
+      background: #1D9E75;
+      transition: width 0.5s linear;
+    }
+
+    /* 4. 輸入區域框框設計 */
+    .inputs {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 2rem;
+      padding: 25px;
+      border: 1.5px solid #eee;
+      border-radius: 15px;
+      background-color: #f9f9f9;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .input-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
+      border-right: 1.5px solid #ddd;
+      padding-right: 20px;
+      line-height: 1.4;
+      text-align: center;
+      white-space: nowrap;
+      /* 強制不換行，這是關鍵！ */
+      flex-shrink: 0;
+      /* 防止文字被擠壓 */
+
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 5. 美化輸入框：移除黑框，改用綠色底線 */
+    .field input {
+      width: 75px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 36px;
+      font-weight: 600;
+      text-align: center;
+      border: none;
+      border-bottom: 3px solid #1D9E75;
+      background: transparent;
+      color: #111;
+      padding: 4px 0;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .field input:focus {
+      border-bottom-color: #14815D;
+      background-color: rgba(29, 158, 117, 0.05);
+    }
+
+    .field label {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #aaa;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .sep {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 30px;
+      color: #ccc;
+      align-self: center;
+      margin-bottom: 15px;
+    }
+
+    .btns {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 12px 40px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      background: #fff;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: #f5f5f5;
+      border-color: #ccc;
+    }
+
+    .btn.go {
+      background: #1D9E75;
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .btn.pause {
+      background: #E24B4A;
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* 手機版適應 */
+    @media (max-width: 560px) {
+      .root {
+        max-width: 95%;
+        padding: 1rem;
+      }
+
+      .time-display {
+        font-size: 20vw;
+        letter-spacing: -4px;
+      }
+
+      .current-time span {
+        font-size: 7vw;
+      }
+
+      .inputs {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 25px;
+        /* 增加元件之間的間距，看起來更大氣 */
+        margin-bottom: 2rem;
+        padding: 25px 35px;
+        /* 增加左右內距 */
+        border: 1.5px solid #eee;
+        border-radius: 15px;
+        background-color: #f9f9f9;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+      }
+
+      .input-label {
+        font-size: 12px;
+        padding-right: 10px;
+      }
+
+      .field input {
+        width: 60px;
+        font-size: 28px;
+      }
+    }
+
+    input[type=number]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="root">
+    <div class="tabs">
+      <button class="tab active" id="tab-at" onclick="switchTab('at')">定時倒數</button>
+      <button class="tab" id="tab-cd" onclick="switchTab('cd')">倒數計時</button>
+    </div>
+
+    <div id="panel-at" class="panel active">
+      <div class="current-time">現在時間 <span id="real-time">--:--:--</span></div>
+      <div class="time-display" id="at-disp">--:--:--</div>
+      <div class="sub" id="at-sub">設定目標時刻</div>
+      <div class="track">
+        <div class="fill" id="at-fill"></div>
+      </div>
+
+      <div class="inputs" id="at-inp">
+        <div class="input-label">請設定時間</div>
+        <div class="field">
+          <input type="number" id="at-h" value="00" min="0" max="23" oninput="atClamp(this,23)">
+          <label>時(24h)</label>
+        </div>
+        <div class="sep">:</div>
+        <div class="field">
+          <input type="number" id="at-m" value="00" min="0" max="59" oninput="atClamp(this,59)">
+          <label>分</label>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="btn go" id="at-main" onclick="atToggle()">開始</button>
+        <button class="btn" id="at-reset" onclick="atReset()" style="display:none">重置</button>
+      </div>
+    </div>
+
+    <div id="panel-cd" class="panel">
+      <div class="time-display" id="cd-disp" style="margin-top: 45px;">--:--:--</div>
+      <div class="sub" id="cd-sub">倒數計時</div>
+      <div class="track">
+        <div class="fill" id="cd-fill"></div>
+      </div>
+
+      <div class="inputs" id="cd-inp">
+        <div class="field">
+          <input type="number" id="cd-h" value="00" min="0" max="99" oninput="cdClamp(this,99)">
+          <label>時</label>
+        </div>
+        <div class="sep">:</div>
+        <div class="field">
+          <input type="number" id="cd-m" value="00" min="0" max="59" oninput="cdClamp(this,59)">
+          <label>分</label>
+        </div>
+        <div class="sep">:</div>
+        <div class="field">
+          <input type="number" id="cd-s" value="00" min="0" max="59" oninput="cdClamp(this,59)">
+          <label>秒</label>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="btn go" id="cd-main" onclick="cdToggle()">開始</button>
+        <button class="btn" id="cd-reset" onclick="cdReset()" style="display:none">重置</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function updateRealTime() {
+      const now = new Date();
+      document.getElementById('real-time').innerHTML = pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+      if (!atRunning) atPreview();
+    }
+    setInterval(updateRealTime, 1000);
+
+    function fmtFull(ms) {
+      const h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000), s = Math.floor(ms % 60000 / 1000);
+      return pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+
+    function switchTab(t) {
+      document.getElementById('tab-at').classList.toggle('active', t === 'at');
+      document.getElementById('tab-cd').classList.toggle('active', t === 'cd');
+      document.getElementById('panel-at').classList.toggle('active', t === 'at');
+      document.getElementById('panel-cd').classList.toggle('active', t === 'cd');
+    }
+
+    // --- 倒數計時邏輯 ---
+    let cdRunning = false, cdRemain = 0, cdTotal = 0, cdStartAt = 0, cdTicker = null;
+    function cdClamp(el, max) { if (el.value !== '' && parseInt(el.value) > max) el.value = max; if (!cdRunning) cdUpdateDisp(); }
+    function cdUpdateDisp() {
+      const h = parseInt(document.getElementById('cd-h').value) || 0, m = parseInt(document.getElementById('cd-m').value) || 0;
+      if (!cdRunning && cdTotal === 0) { document.getElementById('cd-disp').textContent = pad(h) + ":" + pad(m) + ":--"; }
+      else { const s = parseInt(document.getElementById('cd-s').value) || 0; document.getElementById('cd-disp').textContent = fmtFull((h * 3600 + m * 60 + s) * 1000); }
+    }
+    function cdToggle() {
+      const mainBtn = document.getElementById('cd-main'), resetBtn = document.getElementById('cd-reset'), inp = document.getElementById('cd-inp');
+      if (!cdRunning) {
+        const h = parseInt(document.getElementById('cd-h').value) || 0, m = parseInt(document.getElementById('cd-m').value) || 0, s = parseInt(document.getElementById('cd-s').value) || 0;
+        if (!cdTotal && cdRemain === 0) { cdTotal = (h * 3600 + m * 60 + s) * 1000; if (!cdTotal) return; cdRemain = cdTotal; }
+        cdRunning = true; cdStartAt = Date.now() - cdTotal + cdRemain;
+        inp.style.opacity = '0.35'; inp.style.pointerEvents = 'none';
+        mainBtn.textContent = '暫停'; mainBtn.className = 'btn pause'; resetBtn.style.display = '';
+        cdTicker = setInterval(cdTick, 200); cdTick();
+      } else { clearInterval(cdTicker); cdRunning = false; mainBtn.textContent = '繼續'; mainBtn.className = 'btn go'; inp.style.opacity = '1'; inp.style.pointerEvents = ''; }
+    }
+    function cdTick() {
+      const disp = document.getElementById('cd-disp'), sub = document.getElementById('cd-sub'), fill = document.getElementById('cd-fill');
+      cdRemain = Math.max(0, cdTotal - (Date.now() - cdStartAt));
+      disp.textContent = fmtFull(cdRemain);
+      fill.style.width = (cdRemain / cdTotal * 100) + '%';
+      disp.className = 'time-display' + (cdRemain === 0 ? ' done' : ' running');
+      sub.textContent = cdRemain === 0 ? '時間到' : `倒數中...`;
+      if (cdRemain === 0) { clearInterval(cdTicker); cdRunning = false; document.getElementById('cd-main').textContent = '重啟'; }
+    }
+    function cdReset() {
+      clearInterval(cdTicker); cdRunning = false; cdRemain = 0; cdTotal = 0;
+      document.getElementById('cd-h').value = "00"; document.getElementById('cd-m').value = "00"; document.getElementById('cd-s').value = "00";
+      document.getElementById('cd-fill').style.width = '100%'; document.getElementById('cd-main').textContent = '開始';
+      document.getElementById('cd-main').className = 'btn go'; document.getElementById('cd-reset').style.display = 'none';
+      document.getElementById('cd-inp').style.opacity = '1'; document.getElementById('cd-inp').style.pointerEvents = '';
+      cdUpdateDisp();
+    }
+
+    // --- 定時倒數邏輯 ---
+    let atRunning = false, atTarget = null, atTotalMs = 0, atTicker = null;
+    function atClamp(el, max) { if (el.value !== '' && parseInt(el.value) > max) el.value = max; atPreview(); }
+    function atPreview() {
+      if (atRunning) return;
+      const hV = document.getElementById('at-h').value || "00", mV = document.getElementById('at-m').value || "00";
+      const th = parseInt(hV), tm = parseInt(mV), now = new Date(), target = new Date();
+      target.setHours(th, tm, 0, 0); if (target <= now) target.setDate(target.getDate() + 1);
+      const diff = target - now;
+      document.getElementById('at-disp').textContent = pad(Math.floor(diff / 3600000)) + ":" + pad(Math.floor((diff % 3600000) / 60000)) + ":--";
+      document.getElementById('at-sub').textContent = (target.getDate() === now.getDate() ? '今天' : '明天') + ' ' + pad(th) + ':' + pad(tm);
+    }
+    function atToggle() {
+      const mainBtn = document.getElementById('at-main'), resetBtn = document.getElementById('at-reset'), inp = document.getElementById('at-inp');
+      if (!atRunning) {
+        const hV = document.getElementById('at-h').value || "00", mV = document.getElementById('at-m').value || "00";
+        const th = parseInt(hV), tm = parseInt(mV), now = new Date(), target = new Date();
+        target.setHours(th, tm, 0, 0); if (target <= now) target.setDate(target.getDate() + 1);
+        atTarget = target; atTotalMs = target - now;
+        atRunning = true; inp.style.opacity = '0.35'; inp.style.pointerEvents = 'none';
+        mainBtn.textContent = '暫停'; mainBtn.className = 'btn pause'; resetBtn.style.display = '';
+        atTicker = setInterval(atTick, 500); atTick();
+      } else { clearInterval(atTicker); atRunning = false; mainBtn.textContent = '繼續'; mainBtn.className = 'btn go'; inp.style.opacity = '1'; inp.style.pointerEvents = ''; }
+    }
+    function atTick() {
+      const disp = document.getElementById('at-disp'), sub = document.getElementById('at-sub'), fill = document.getElementById('at-fill');
+      const diff = Math.max(0, atTarget - new Date());
+      disp.textContent = fmtFull(diff);
+      fill.style.width = (diff / atTotalMs * 100) + '%';
+      disp.className = 'time-display' + (diff === 0 ? ' done' : ' running');
+      sub.textContent = diff === 0 ? '時間到' : '倒數中...';
+      if (diff === 0) { clearInterval(atTicker); atRunning = false; document.getElementById('at-main').textContent = '重設'; }
+    }
+    function atReset() {
+      clearInterval(atTicker); atRunning = false; atTarget = null;
+      document.getElementById('at-h').value = "00"; document.getElementById('at-m').value = "00";
+      document.getElementById('at-reset').style.display = 'none'; document.getElementById('at-main').textContent = '開始';
+      document.getElementById('at-main').className = 'btn go'; document.getElementById('at-inp').style.opacity = '1'; document.getElementById('at-inp').style.pointerEvents = '';
+      atPreview();
+    }
+
+    updateRealTime();
+    cdUpdateDisp();
+  </script>
+</body>
+
+</html>
