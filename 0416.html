@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大呷麵本家元宇宙知識大闖關｜碩士論文專屬</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Microsoft JhengHei", "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 95%;
+            margin: 20px auto;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 3px solid #ffcc00;
+        }
+        header {
+            background: linear-gradient(90deg, #ffcc00, #ff9900);
+            color: #000;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        header h1 {
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+        }
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: #1a1a2e;
+            font-size: 1.3rem;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #level { color: #ffcc00; font-weight: bold; }
+        #score { color: #00ff88; font-weight: bold; }
+        #progress { color: #66ccff; font-weight: bold; }
+
+        .game-area {
+            padding: 40px 30px;
+            min-height: 420px;
+        }
+        #question-text {
+            font-size: 1.65rem;
+            text-align: center;
+            margin-bottom: 35px;
+            line-height: 1.4;
+            min-height: 80px;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 18px;
+        }
+        .option-btn {
+            padding: 22px 20px;
+            font-size: 1.25rem;
+            background: #4a4a8a;
+            border: none;
+            border-radius: 18px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            text-align: left;
+        }
+        .option-btn:hover {
+            background: #6a6ab8;
+            transform: translateY(-4px);
+        }
+        .option-btn.correct {
+            background: #28a745;
+            animation: correctAnim 0.6s;
+        }
+        .option-btn.wrong {
+            background: #dc3545;
+        }
+        @keyframes correctAnim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .footer {
+            padding: 25px;
+            text-align: center;
+            background: #1a1a2e;
+            border-top: 1px solid #333;
+        }
+        .btn {
+            padding: 16px 45px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+        #next-btn {
+            background: #ffcc00;
+            color: #000;
+        }
+        #restart-btn {
+            background: #00cc88;
+            color: #000;
+        }
+        .btn:hover {
+            transform: scale(1.1);
+        }
+
+        .result {
+            text-align: center;
+            font-size: 2rem;
+            padding: 30px;
+        }
+        .result h2 {
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s linear forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>元宇宙知識大闖關</h1>
+            <p>碩士論文《在元宇宙中基於大型語言模型之 AI 虛擬導覽員》專屬</p>
+            <p style="font-size:1rem; margin-top:5px;">50題 × 10關｜總分1000分｜答對累積分數</p>
+        </header>
+
+        <div class="info-bar">
+            <div class="info-item">第 <span id="level">1</span> 關</div>
+            <div class="info-item">分數: <span id="score">0</span> / 1000</div>
+            <div class="info-item">進度: <span id="progress">0/5</span></div>
+        </div>
+
+        <div class="game-area" id="game-area">
+            <h2 id="question-text"></h2>
+            <div id="options" class="options"></div>
+        </div>
+
+        <div class="footer">
+            <button id="next-btn" class="btn" onclick="nextQuestion()" style="display:none;">下一題 →</button>
+            <button id="restart-btn" class="btn" onclick="restartGame()" style="display:none;">重新開始遊戲</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 50題資料（來自碩士論文內容）====================
+        const questionsData = [
+            // 第 1 關：元宇宙基礎
+            { level:1, q:"元宇宙一詞最早出現在哪本小說？", options:["Snow Crash","Ready Player One","刀劍神域","Second Life"], ans:0 },
+            { level:1, q:"新冠肺炎疫情如何影響元宇宙的發展？", options:["阻礙實體交流，讓虛擬世界受關注","加速區塊鏈技術發展","使VR眼鏡價格下降","讓Roblox使用者減少"], ans:0 },
+            { level:1, q:"元宇宙與一般遊戲最大的不同在於？", options:["更強調虛擬與現實的整合","只限於單機遊玩","不需要網路","無法與他人互動"], ans:0 },
+            { level:1, q:"本論文與哪家臺中製麵觀光工廠合作打造元宇宙？", options:["大呷麵本家","統一麵包","味全食品","日清麵"], ans:0 },
+            { level:1, q:"元宇宙的關鍵特徵最早由哪個平台提出？", options:["Roblox","Second Life","The Sandbox","Horizon Worlds"], ans:0 },
+
+            // 第 2 關：Roblox 平台
+            { level:2, q:"Roblox 的程式語言是？", options:["Lua","Python","JavaScript","C#"], ans:0 },
+            { level:2, q:"Roblox Corporation 從開發者收入中抽成比例大約是？", options:["30%~70%","10%~20%","50%固定","完全免費"], ans:0 },
+            { level:2, q:"Chipotle 在 Roblox 上推出的體驗遊戲名稱為？", options:["Burrito Builder","Taco Maker","Mexican Quest","Chipotle World"], ans:0 },
+            { level:2, q:"本論文選擇 Roblox 作為元宇宙平台的主要原因是？", options:["使用者數量最多且可免費建立環境","支援區塊鏈","專門做教育用途","有最強的VR支援"], ans:0 },
+            { level:2, q:"Roblox 的虛擬貨幣名稱是？", options:["Robux","SAND","MANA","ZEM"], ans:0 },
+
+            // 第 3 關：虛擬導覽員
+            { level:3, q:"傳統虛擬導覽員最常見的回答方式是？", options:["固定文本","大型語言模型","即時生成圖片","語音辨識"], ans:0 },
+            { level:3, q:"本論文在元宇宙中加入 AI 虛擬導覽員的主要目的為？", options:["講解工廠歷史、故事與商品資訊","只負責導航路徑","播放背景音樂","管理玩家帳號"], ans:0 },
+            { level:3, q:"以下哪個不是論文中提到的虛擬導覽員案例？", options:["彰化好神通 LINE 機器人","LVR 工業博物館 App","現代藝術博物館 Dialog","Google Maps 導航"], ans:3 },
+            { level:3, q:"本研究使用的 AI 虛擬導覽員核心技術是？", options:["大型語言模型 (LLM)","規則式腳本","預錄語音","圖像辨識"], ans:0 },
+            { level:3, q:"論文中與大呷麵本家合作的主要目的是？", options:["將實體工廠完整呈現於元宇宙並提供導覽","只做線上購物","開發新遊戲","測試區塊鏈"], ans:0 },
+
+            // 第 4 關：大型語言模型概論
+            { level:4, q:"大型語言模型 (LLM) 的核心架構主要是？", options:["Transformer","CNN","RNN","GAN"], ans:0 },
+            { level:4, q:"RLHF 的中文全名是？", options:["基於人類回饋的強化學習","隨機森林","長短期記憶","生成對抗網路"], ans:0 },
+            { level:4, q:"論文中使用到的三種大型語言模型分別來自？", options:["OpenAI、Google、Meta","Microsoft、Apple、IBM","百度、阿里、騰訊","DeepMind、Anthropic、Cohere"], ans:0 },
+            { level:4, q:"以下哪個不是 LLM 的關鍵特徵？", options:["上下文學習","RLHF","圖像生成","少樣本學習"], ans:2 },
+            { level:4, q:"ChatGPT 於哪一年推出？", options:["2022","2020","2023","2021"], ans:0 },
+
+            // 第 5 關：GPT-3.5 Turbo
+            { level:5, q:"GPT-3.5 Turbo 的參數量約為？", options:["1750 億","1750 萬","15.42 億","650 億"], ans:0 },
+            { level:5, q:"本論文對 GPT-3.5 Turbo 使用的微調方法是？", options:["Fine-tuning","Few-shot prompting","LoRA","Zero-shot"], ans:0 },
+            { level:5, q:"GPT-3.5 Turbo 在機器評估的平均分數為？", options:["0.7530","0.7800","0.4514","0.8200"], ans:0 },
+            { level:5, q:"GPT-3.5 Turbo 微調後的最大缺點是？", options:["運行成本較高","回答速度慢","開源無法商用","無法處理中文"], ans:0 },
+            { level:5, q:"論文中 GPT-3.5 Turbo 訓練了多少 Epoch？", options:["50 Epoch","200 Epoch","10 Epoch","100 Epoch"], ans:0 },
+
+            // 第 6 關：Gemini Pro
+            { level:6, q:"Gemini Pro 前身曾使用的名稱是？", options:["Bard","LaMDA","PaLM","Gemini Nano"], ans:0 },
+            { level:6, q:"Gemini Pro 在本論文中使用的方法是？", options:["Few-shot prompting","Fine-tuning","LoRA","Embedding"], ans:0 },
+            { level:6, q:"Gemini Pro 在機器評估的平均分數為？", options:["0.7800","0.7530","0.4514","0.8100"], ans:0 },
+            { level:6, q:"Gemini Pro 的最大優勢是？", options:["綜合表現最佳且基本方案免費","參數量最大","開源","最快回應"], ans:0 },
+            { level:6, q:"Gemini 1.5 Pro 可處理的 Token 數量高達？", options:["100 萬","32,000","1 萬","10 萬"], ans:0 },
+
+            // 第 7 關：Taiwan-LLM 與 Llama 2
+            { level:7, q:"Taiwan-LLM 是基於哪個模型衍生的？", options:["Meta Llama 2","GPT-3","PaLM","Claude"], ans:0 },
+            { level:7, q:"本論文對 Taiwan-LLM 使用的微調技術是？", options:["LoRA","Fine-tuning","Few-shot prompting","RLHF"], ans:0 },
+            { level:7, q:"Taiwan-LLM 在機器評估的平均分數為？", options:["0.4514","0.7800","0.7530","0.6500"], ans:0 },
+            { level:7, q:"Llama 2 與其他商業模型最大的不同是？", options:["完全開源且可商用","參數量最大","多模態","收費最低"], ans:0 },
+            { level:7, q:"LoRA 的全名是？", options:["Low-rank adaptation","Long-range attention","Low-resolution adapter","Layer-wise optimization"], ans:0 },
+
+            // 第 8 關：微調方法比較
+            { level:8, q:"Fine-tuning、Few-shot prompting、LoRA 三種方法中，哪種成本最低？", options:["Few-shot prompting","Fine-tuning","LoRA","Embedding"], ans:0 },
+            { level:8, q:"本論文使用哪種方法讓 Taiwan-LLM 在本地端運行？", options:["LoRA","Fine-tuning","Few-shot prompting","API 呼叫"], ans:0 },
+            { level:8, q:"Gemini Pro 使用哪種提示技巧？", options:["Few-shot prompting","Zero-shot","Chain-of-Thought","Tree-of-Thought"], ans:0 },
+            { level:8, q:"Fine-tuning 需要上傳的資料集格式是？", options:["jsonl","csv","txt","xlsx"], ans:0 },
+            { level:8, q:"LoRA 的主要優點是？", options:["只需調整少量參數，成本低","完全不需要訓練","可處理影像","支援多語言"], ans:0 },
+
+            // 第 9 關：實驗評估方式
+            { level:9, q:"論文使用的機器評估指標不包含？", options:["ROUGE","BLEU","Sentence Transformers","Accuracy"], ans:3 },
+            { level:9, q:"A-Round 與 B-Round 的差異在於？", options:["問題是否與訓練資料敘述相同","回答長度","語言種類","是否為中文"], ans:0 },
+            { level:9, q:"問卷法人工評估中，Gemini Pro 的平均分數為？", options:["8.5004","8.3035","7.8144","9.0000"], ans:0 },
+            { level:9, q:"論文中共有多少種人工評估方法？", options:["3 種（問卷、知識點、延遲時間）","2 種","4 種","只有機器評估"], ans:0 },
+            { level:9, q:"ROUGE 評分在 0.3~0.4 之間時，根據論文引用研究，已算？", options:["合格","極佳","不及格","普通"], ans:0 },
+
+            // 第 10 關：綜合結論與未來展望
+            { level:10, q:"論文最終推薦哪個模型作為大呷麵本家元宇宙 AI 虛擬導覽員？", options:["Gemini Pro","GPT-3.5-turbo","Taiwan-LLM","Llama 2 原版"], ans:0 },
+            { level:10, q:"Gemini Pro 被推薦的主要原因是？", options:["綜合表現最佳且基本方案免費","開源","回答最快","參數量最大"], ans:0 },
+            { level:10, q:"論文中 Taiwan-LLM 的最大優勢是？", options:["作為開源模型有巨大改進潛力","免費 API","多模態","最快速度"], ans:0 },
+            { level:10, q:"本研究未來展望不包含？", options:["更強大的多模態模型","區塊鏈支付","擴大到其他產業","完全取代真人導覽"], ans:3 },
+            { level:10, q:"論文指導教授為？", options:["焦信達博士、楊朝棟博士","袁賢銘博士","張玉山博士","劉世欣先生"], ans:0 }
+        ];
+
+        // 遊戲變數
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        // 取得當前關卡的題目
+        function getLevelQuestions() {
+            return questionsData.filter(q => q.level === currentLevel);
+        }
+
+        // 顯示當前問題
+        function showQuestion() {
+            const qList = getLevelQuestions();
+            const q = qList[currentQuestionIndex];
+
+            document.getElementById("level").textContent = currentLevel;
+            document.getElementById("score").textContent = score;
+            document.getElementById("progress").textContent = `${currentQuestionIndex + 1}/5`;
+            document.getElementById("question-text").innerHTML = `<strong>第 ${currentLevel} 關・第 ${currentQuestionIndex + 1} 題</strong><br>${q.q}`;
+
+            const optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.textContent = `${String.fromCharCode(65 + i)}． ${opt}`;
+                btn.onclick = () => handleAnswer(i, q.ans);
+                optionsDiv.appendChild(btn);
+            });
+
+            answered = false;
+            document.getElementById("next-btn").style.display = "none";
+        }
+
+        // 處理答案
+        function handleAnswer(selected, correct) {
+            if (answered) return;
+            answered = true;
+
+            const buttons = document.querySelectorAll(".option-btn");
+            buttons.forEach((btn, i) => {
+                if (i === correct) btn.classList.add("correct");
+                if (i === selected && i !== correct) btn.classList.add("wrong");
+                btn.onclick = null;
+            });
+
+            if (selected === correct) {
+                score += 20;
+                document.getElementById("score").textContent = score;
+            }
+
+            document.getElementById("next-btn").style.display = "inline-block";
+        }
+
+        // 下一題 / 下一關
+        window.nextQuestion = function() {
+            currentQuestionIndex++;
+
+            const qList = getLevelQuestions();
+
+            if (currentQuestionIndex < 5) {
+                showQuestion();
+            } else {
+                // 本關結束
+                if (currentLevel < 10) {
+                    currentLevel++;
+                    currentQuestionIndex = 0;
+                    showQuestion();
+                } else {
+                    // 遊戲結束
+                    endGame();
+                }
+            }
+        };
+
+        // 遊戲結束畫面
+        function endGame() {
+            const area = document.getElementById("game-area");
+            area.innerHTML = `
+                <div class="result">
+                    <h2>🎉 恭喜通關！</h2>
+                    <p style="font-size:2.5rem; margin:20px 0;">總分 <strong style="color:#ffcc00;">${score}</strong> / 1000</p>
+                    <p style="font-size:1.4rem; margin-bottom:30px;">
+                        ${score >= 900 ? "🏆 完美碩士級！你是元宇宙專家！" : 
+                          score >= 700 ? "🌟 非常優秀！已掌握論文精華" : 
+                          score >= 500 ? "👍 不錯喔！再挑戰一次吧" : "📚 多讀論文，再來一次！"}
+                    </p>
+                    <button class="btn" onclick="restartGame()" style="background:#ffcc00; color:#000; font-size:1.6rem; padding:20px 60px;">重新開始闖關</button>
+                </div>
+            `;
+            document.getElementById("next-btn").style.display = "none";
+            document.getElementById("restart-btn").style.display = "none";
+        }
+
+        // 重新開始
+        window.restartGame = function() {
+            currentLevel = 1;
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById("game-area").innerHTML = `
+                <h2 id="question-text"></h2>
+                <div id="options" class="options"></div>
+            `;
+            showQuestion();
+        };
+
+        // 啟動遊戲
+        window.onload = function() {
+            showQuestion();
+        };
+    </script>
+</body>
+</html>
