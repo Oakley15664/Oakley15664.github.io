@@ -134,7 +134,7 @@
 <script>
 const HOLIDAYS = { 1:'溫書假', 2:'調整放假', 3:'兒童節補假', 6:'掃墓節補假' };
 const SLOTS = [
-  { name:'早上', time:'7:00-8:00',    noon: false },
+  { name:'早上', time:'7:00-8:00',    noon: true },
   { name:'中午', time:'12:20-13:20',  noon: true  }
 ];
 const WD_NAMES = ['(一)','(二)','(三)','(四)','(五)'];
@@ -183,7 +183,7 @@ function mk(tag, cls, html) {
 function render() {
   const container = document.getElementById('scheduleContainer');
   container.innerHTML = '';
-  const name = document.getElementById('nameInput').value || '（h你的名字）';
+  const name = document.getElementById('nameInput').value || '（你的名字）';
   let cumTotal = 0;
 
   weeks.forEach((week, wi) => {
