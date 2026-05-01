@@ -272,7 +272,7 @@ function render() {
     if (day && !HOLIDAYS[day]) SLOTS.forEach((_, si) => { if (state[wi][di][si]) total++; });
   }));
   document.getElementById('statPresent').textContent = total;
-  document.getElementById('statHours').textContent = total;
+  document.getElementById('statHours').textContent = cumTotal;
 }
 
 document.getElementById('nameInput').addEventListener('input', () => {
