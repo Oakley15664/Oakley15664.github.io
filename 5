@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>四月排班表 2026</title>
+<title>五月排班表 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -103,8 +103,8 @@
 
 <div class="page-header">
   <div>
-    <div class="title-main">四月排班表</div>
-    <div class="title-sub">APRIL · 2026</div>
+    <div class="title-main">五月排班表</div>
+    <div class="title-sub">MAY · 2026</div>
   </div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
     <div class="name-block">
@@ -118,7 +118,7 @@
 <div class="stats-bar">
   <div class="stat-card"><div class="stat-label">已出勤場次</div><div class="stat-value" id="statPresent">0</div></div>
   <div class="stat-card accent"><div class="stat-label">本月累積時數</div><div class="stat-value" id="statHours">0</div></div>
-  <div class="stat-card"><div class="stat-label">可出勤上班日</div><div class="stat-value">18</div></div>
+  <div class="stat-card"><div class="stat-label">可出勤上班日</div><div class="stat-value">20</div></div>
 </div>
 
 <div id="scheduleContainer"></div>
@@ -132,7 +132,9 @@
 </div>
 
 <script>
-const HOLIDAYS = { 1:'溫書假', 2:'調整放假', 3:'兒童節補假', 6:'掃墓節補假' };
+const HOLIDAYS = {
+        1:'勞動節'
+      };
 const SLOTS = [
   { name:'早上', time:'7:00-8:00',    noon: true },
   { name:'中午', time:'12:20-13:20',  noon: true  }
@@ -142,8 +144,8 @@ const WD_NAMES = ['(一)','(二)','(三)','(四)','(五)'];
 function buildWeeks() {
   const weeks = [];
   let week = Array(5).fill(null), started = false;
-  for (let d = 1; d <= 30; d++) {
-    const wd = new Date(2026, 3, d).getDay();
+  for (let d = 1; d <= 31; d++) {
+    const wd = new Date(2026, 4, d).getDay();
     if (wd === 0 || wd === 6) continue;
     const idx = wd - 1;
     if (idx === 0 && started) { weeks.push(week); week = Array(5).fill(null); }
@@ -161,7 +163,7 @@ const state = weeks.map(wk => wk.map(() => [false, false]));
 // 從 localStorage 讀取上次的勾選狀態
 (function loadState() {
   try {
-    const saved = localStorage.getItem('april_schedule_2026_state');
+    const saved = localStorage.getItem('may_schedule_2026_state');
     if (saved) {
       const parsed = JSON.parse(saved);
       parsed.forEach((wk, wi) => wk.forEach((day, di) => day.forEach((v, si) => {
@@ -195,7 +197,7 @@ function render() {
     week.forEach((day, di) => {
       const isEmpty = day === null, isHol = !isEmpty && !!HOLIDAYS[day];
       const cls = 'cell c-date' + (isEmpty ? ' emp' : isHol ? ' hol' : '');
-      const html = isEmpty ? '' : `4/${day}<span class="wd">${WD_NAMES[di]}${isHol ? ' · '+HOLIDAYS[day] : ''}</span>`;
+      const html = isEmpty ? '' : `5/${day}<span class="wd">${WD_NAMES[di]}${isHol ? ' · '+HOLIDAYS[day] : ''}</span>`;
       const c = mk('div', cls, html);
       c.style.gridColumn = 'span 2';
       r1.appendChild(c);
@@ -249,7 +251,7 @@ function render() {
           c.textContent = on ? '1' : 'X';
           if (on) wkCount++;
           c.addEventListener('click', () => { state[wi][di][si] = !state[wi][di][si];
-              localStorage.setItem('april_schedule_2026_state', JSON.stringify(state));
+              localStorage.setItem('may_schedule_2026_state', JSON.stringify(state));
               render(); });
         }
         r4.appendChild(c);
@@ -274,13 +276,13 @@ function render() {
 document.getElementById('nameInput').addEventListener('input', () => {
   const n = document.getElementById('nameInput').value || '（你的名字）';
   document.querySelectorAll('.name-cell').forEach(el => el.textContent = n);
-  localStorage.setItem('april_schedule_2026_name', document.getElementById('nameInput').value);
+  localStorage.setItem('may_schedule_2026_name', document.getElementById('nameInput').value);
 });
 
 // 從 localStorage 讀取上次的姓名
 (function loadName() {
   try {
-    const savedName = localStorage.getItem('april_schedule_2026_name');
+    const savedName = localStorage.getItem('may_schedule_2026_name');
     if (savedName) {
       document.getElementById('nameInput').value = savedName;
     }
