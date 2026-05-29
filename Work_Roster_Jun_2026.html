@@ -145,7 +145,8 @@ function buildWeeks() {
   const weeks = [];
   let week = Array(5).fill(null), started = false;
   for (let d = 1; d <= 30; d++) {
-    const wd = new Date(2026, 6, d).getDay();
+    const wd = new Date(2026, 5, d).getDay();
+    // 這裡用 6。但 JavaScript 的 new Date(year, month, day) 月份是從 0 開始算的:0=一月、5=六月、6=七月。所以 new Date(2026, 6, d) 算的其實是七月的星期幾,不是六月。
     if (wd === 0 || wd === 6) continue;
     const idx = wd - 1;
     if (idx === 0 && started) { weeks.push(week); week = Array(5).fill(null); }
