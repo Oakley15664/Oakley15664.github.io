@@ -145,7 +145,7 @@ function buildWeeks() {
   const weeks = [];
   let week = Array(5).fill(null), started = false;
   for (let d = 1; d <= 30; d++) {
-    const wd = new Date(2026, 5, d).getDay();
+    const wd = new Date(2026, 6, d).getDay();
     if (wd === 0 || wd === 6) continue;
     const idx = wd - 1;
     if (idx === 0 && started) { weeks.push(week); week = Array(5).fill(null); }
@@ -163,7 +163,7 @@ const state = weeks.map(wk => wk.map(() => [false, false]));
 // 從 localStorage 讀取上次的勾選狀態
 (function loadState() {
   try {
-    const saved = localStorage.getItem('may_schedule_2026_state');
+    const saved = localStorage.getItem('schedule_state');
     if (saved) {
       const parsed = JSON.parse(saved);
       parsed.forEach((wk, wi) => wk.forEach((day, di) => day.forEach((v, si) => {
@@ -251,7 +251,7 @@ function render() {
           c.textContent = on ? '1' : 'X';
           if (on) wkCount++;
           c.addEventListener('click', () => { state[wi][di][si] = !state[wi][di][si];
-              localStorage.setItem('may_schedule_2026_state', JSON.stringify(state));
+              localStorage.setItem('schedule_state', JSON.stringify(state));
               render(); });
         }
         r4.appendChild(c);
@@ -262,27 +262,7 @@ function render() {
     r4.appendChild(mk('div', 'cell c-wk-total no-bb', wkCount));
     r4.appendChild(mk('div', 'cell c-mo-total no-bb', cumTotal));
     block.appendChild(r4);
-    container.appendChild(block);
-  });
-
-  let total = 0;
-  weeks.forEach((wk, wi) => wk.forEach((day, di) => {
-    if (day && !HOLIDAYS[day]) SLOTS.forEach((_, si) => { if (state[wi][di][si]) total++; });
-  }));
-  document.getElementById('statPresent').textContent = total;
-  document.getElementById('statHours').textContent = cumTotal;
-}
-
-document.getElementById('nameInput').addEventListener('input', () => {
-  const n = document.getElementById('nameInput').value || '（你的名字）';
-  document.querySelectorAll('.name-cell').forEach(el => el.textContent = n);
-  localStorage.setItem('may_schedule_2026_name', document.getElementById('nameInput').value);
-});
-
-// 從 localStorage 讀取上次的姓名
-(function loadName() {
-  try {
-    const savedName = localStorage.getItem('may_schedule_2026_name');
+    _name');
     if (savedName) {
       document.getElementById('nameInput').value = savedName;
     }
