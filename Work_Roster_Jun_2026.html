@@ -134,10 +134,10 @@
 </div>
 
 <script>
-const HOLIDAYS = { 20:'端午節' }
+const HOLIDAYS = { 20:'端午節' };
 const SLOTS = [
-  { name:'早上', time:'7:00-8:00',    noon: true },
-  { name:'中午', time:'12:20-13:20',  noon: true  }
+  { name:'早上', time:'7:00-8:00',   noon: true },
+  { name:'中午', time:'12:20-13:20', noon: true }
 ];
 const WD_NAMES = ['(一)','(二)','(三)','(四)','(五)'];
 
@@ -145,8 +145,7 @@ function buildWeeks() {
   const weeks = [];
   let week = Array(5).fill(null), started = false;
   for (let d = 1; d <= 30; d++) {
-    const wd = new Date(2026, 5, d).getDay();
-    // 這裡用 6。但 JavaScript 的 new Date(year, month, day) 月份是從 0 開始算的:0=一月、5=六月、6=七月。所以 new Date(2026, 6, d) 算的其實是七月的星期幾,不是六月。
+    const wd = new Date(2026, 5, d).getDay(); // 5 = 六月
     if (wd === 0 || wd === 6) continue;
     const idx = wd - 1;
     if (idx === 0 && started) { weeks.push(week); week = Array(5).fill(null); }
@@ -161,7 +160,6 @@ const weeks = buildWeeks();
 const WEEK_NAMES = ['一','二','三','四','五'];
 const state = weeks.map(wk => wk.map(() => [false, false]));
 
-// 從 localStorage 讀取上次的勾選狀態
 (function loadState() {
   try {
     const saved = localStorage.getItem('schedule_state');
@@ -251,19 +249,35 @@ function render() {
           c.className = 'cell att ' + (on ? 'on' : 'off');
           c.textContent = on ? '1' : 'X';
           if (on) wkCount++;
-          c.addEventListener('click', () => { state[wi][di][si] = !state[wi][di][si];
-              localStorage.setItem('schedule_state', JSON.stringify(state));
-              render(); });
+          c.addEventListener('click', () => {
+            state[wi][di][si] = !state[wi][di][si];
+            localStorage.setItem('schedule_state', JSON.stringify(state));
+            render();
+          });
         }
         r4.appendChild(c);
       });
     });
     cumTotal += wkCount;
-
     r4.appendChild(mk('div', 'cell c-wk-total no-bb', wkCount));
     r4.appendChild(mk('div', 'cell c-mo-total no-bb', cumTotal));
     block.appendChild(r4);
-    _name');
+
+    container.appendChild(block);
+  });
+
+  const statHours = document.getElementById('statHours');
+  if (statHours) statHours.textContent = cumTotal;
+}
+
+document.getElementById('nameInput').addEventListener('input', () => {
+  localStorage.setItem('schedule_name', document.getElementById('nameInput').value);
+  render();
+});
+
+(function loadName() {
+  try {
+    const savedName = localStorage.getItem('schedule_name');
     if (savedName) {
       document.getElementById('nameInput').value = savedName;
     }
