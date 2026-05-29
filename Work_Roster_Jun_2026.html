@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>五月掃地排班表 2026</title>
+<title>六月掃地排班表 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -103,8 +103,8 @@
 
 <div class="page-header">
   <div>
-    <div class="title-main">五月排班表</div>
-    <div class="title-sub">MAY · 2026</div>
+    <div class="title-main">六月排班表</div>
+    
   </div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
     <div class="name-block">
@@ -116,8 +116,8 @@
 </div>
 
 <div class="stats-bar">
-  <div class="stat-card"><div class="stat-label">本月可出勤上班日</div><div class="stat-value">20</div></div>
-  <div class="stat-card"><div class="stat-label">本月可出勤時數</div><div class="stat-value">40</div></div>
+  <div class="stat-card"><div class="stat-label">本月可出勤上班日</div><div class="stat-value">21</div></div>
+  <div class="stat-card"><div class="stat-label">本月可出勤時數</div><div class="stat-value">42</div></div>
   <div class="stat-card"><div class="stat-label">本月需出勤時數</div><div class="stat-value">25</div></div>
   <div class="stat-card accent"><div class="stat-label">本月累積時數</div><div class="stat-value" id="statHours">0</div></div>
   
@@ -134,9 +134,7 @@
 </div>
 
 <script>
-const HOLIDAYS = {
-        1:'勞動節'
-      };
+const HOLIDAYS = { 20:'端午節' }
 const SLOTS = [
   { name:'早上', time:'7:00-8:00',    noon: true },
   { name:'中午', time:'12:20-13:20',  noon: true  }
@@ -146,8 +144,8 @@ const WD_NAMES = ['(一)','(二)','(三)','(四)','(五)'];
 function buildWeeks() {
   const weeks = [];
   let week = Array(5).fill(null), started = false;
-  for (let d = 1; d <= 31; d++) {
-    const wd = new Date(2026, 4, d).getDay();
+  for (let d = 1; d <= 30; d++) {
+    const wd = new Date(2026, 5, d).getDay();
     if (wd === 0 || wd === 6) continue;
     const idx = wd - 1;
     if (idx === 0 && started) { weeks.push(week); week = Array(5).fill(null); }
@@ -199,7 +197,7 @@ function render() {
     week.forEach((day, di) => {
       const isEmpty = day === null, isHol = !isEmpty && !!HOLIDAYS[day];
       const cls = 'cell c-date' + (isEmpty ? ' emp' : isHol ? ' hol' : '');
-      const html = isEmpty ? '' : `5/${day}<span class="wd">${WD_NAMES[di]}${isHol ? ' · '+HOLIDAYS[day] : ''}</span>`;
+      const html = isEmpty ? '' : `6/${day}<span class="wd">${WD_NAMES[di]}${isHol ? ' · '+HOLIDAYS[day] : ''}</span>`;
       const c = mk('div', cls, html);
       c.style.gridColumn = 'span 2';
       r1.appendChild(c);
