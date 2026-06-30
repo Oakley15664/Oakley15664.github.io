@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的人生時間軸</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafaf7;
+      --white: #ffffff;
+      --navy: #1a2a4a;
+      --gray: #7a8898;
+      --border: #e4e8f0;
+      --line: linear-gradient(to bottom, #85C1E9, #C39BD3, #F0B27A);
+      --c-event: #85C1E9;
+      --c-travel: #F1948A;
+      --c-achievement: #F0B27A;
+      --c-habit: #82E0AA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+      min-height: 100vh;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 60px 24px 40px;
+      background: linear-gradient(160deg, #eef4fd 0%, #faf6ff 50%, #fff8f2 100%);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 6vw, 48px);
+      color: var(--navy);
+      letter-spacing: 0.02em;
+    }
+    .hero-subtitle {
+      margin-top: 10px;
+      font-size: 15px;
+      color: var(--gray);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+    .hero-meta {
+      margin-top: 20px;
+      display: inline-flex;
+      gap: 24px;
+      font-size: 13px;
+      color: var(--gray);
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 5px; }
+
+    /* ── Filter chips ── */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 20px 24px;
+      position: sticky;
+      top: 0;
+      background: rgba(250, 250, 247, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+    }
+    .chip {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gray);
+      cursor: pointer;
+      transition: all 0.18s;
+      user-select: none;
+    }
+    .chip:hover { border-color: #b0c0d8; color: var(--navy); }
+    .chip.active { color: var(--white); border-color: transparent; }
+    .chip[data-type="all"].active   { background: var(--navy); }
+    .chip[data-type="event"].active { background: var(--c-event); }
+    .chip[data-type="travel"].active { background: var(--c-travel); }
+    .chip[data-type="achievement"].active { background: var(--c-achievement); }
+
+    /* ── Timeline body ── */
+    .timeline-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      position: relative;
+    }
+    .timeline-line {
+      position: absolute;
+      left: 44px;
+      top: 40px;
+      bottom: 80px;
+      width: 3px;
+      background: var(--line);
+      border-radius: 2px;
+    }
+
+    /* ── Era header ── */
+    .era-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 36px 0 20px 0;
+      padding-left: 72px;
+    }
+    .era-header::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 3px solid var(--navy);
+      position: absolute;
+      left: 31px;
+      box-shadow: 0 0 0 4px var(--bg);
+    }
+    .era-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .era-years {
+      font-size: 12px;
+      color: var(--gray);
+      letter-spacing: 0.05em;
+    }
+    .era-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Event card ── */
+    .event-card {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      cursor: pointer;
+    }
+    .event-card.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .event-card.hidden { display: none; }
+
+    .dot-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 20px;
+      margin-left: 34px;
+    }
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2.5px solid var(--white);
+      box-shadow: 0 0 0 2px currentColor, 0 2px 8px rgba(0,0,0,0.12);
+      margin-top: 14px;
+      flex-shrink: 0;
+    }
+    .dot.type-event       { color: var(--c-event);       background: var(--c-event); }
+    .dot.type-travel      { color: var(--c-travel);      background: var(--c-travel); }
+    .dot.type-achievement { color: var(--c-achievement); background: var(--c-achievement); }
+
+    .card-body {
+      flex: 1;
+      background: var(--white);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      border-left: 4px solid transparent;
+      transition: box-shadow 0.18s, transform 0.18s;
+    }
+    .card-body:hover {
+      box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+      transform: translateY(-1px);
+    }
+    .card-body.type-event       { border-left-color: var(--c-event); }
+    .card-body.type-travel      { border-left-color: var(--c-travel); }
+    .card-body.type-achievement { border-left-color: var(--c-achievement); }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .card-icon { font-size: 18px; line-height: 1; }
+    .card-date {
+      font-size: 12px;
+      color: var(--gray);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .card-tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-left: auto;
+    }
+    .card-tag.type-event       { background: #ddf0fc; color: #2e7bb0; }
+    .card-tag.type-travel      { background: #fdecea; color: #b04040; }
+    .card-tag.type-achievement { background: #fef3e2; color: #9a6800; }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: #4a5a6a;
+      line-height: 1.7;
+      margin-bottom: 10px;
+      font-weight: 300;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .card-location {
+      font-size: 12px;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .card-habit {
+      font-size: 11px;
+      background: #f0f8f2;
+      color: #3a7a52;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .card-image {
+      width: 100%;
+      height: 140px;
+      background: #f0f4f8;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #b0b8c8;
+      font-size: 12px;
+      overflow: hidden;
+    }
+    .card-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,20,40,0.55);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--white);
+      border-radius: 18px;
+      max-width: 480px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 28px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px; right: 18px;
+      background: none; border: none;
+      font-size: 22px; color: var(--gray);
+      cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: var(--navy); }
+    .modal-icon { font-size: 36px; margin-bottom: 10px; }
+    .modal-date { font-size: 13px; color: var(--gray); margin-bottom: 4px; }
+    .modal-title { font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+    .modal-image {
+      width: 100%;
+      height: 180px;
+      background: #f0f4f8;
+      border-radius: 10px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #b0b8c8;
+      font-size: 13px;
+      overflow: hidden;
+    }
+    .modal-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+    .modal-desc { font-size: 14px; color: #4a5a6a; line-height: 1.8; margin-bottom: 16px; }
+    .modal-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .modal-meta-item {
+      font-size: 13px;
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--navy);
+    }
+    .modal-meta-item span { color: var(--gray); font-size: 11px; display: block; }
+
+    /* ── Back to top ── */
+    #backTop {
+      position: fixed;
+      bottom: 28px; right: 24px;
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 50;
+    }
+    #backTop.show { opacity: 1; pointer-events: auto; }
+    #backTop:hover { background: #2c4a7a; }
+
+    /* ── Footer ── */
+    .page-footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--gray);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── RWD ── */
+    @media (max-width: 480px) {
+      .timeline-line { left: 36px; }
+      .dot-col { margin-left: 26px; }
+      .era-header { padding-left: 60px; }
+      .era-header::before { left: 23px; }
+      .timeline-wrap { padding: 30px 16px 80px; }
+      .card-body { padding: 12px 14px; }
+      .modal-box { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-title">我的人生時間軸</div>
+  <div class="hero-subtitle">記錄走過的每一個階段 · My Life Story</div>
+  <div class="hero-meta">
+    <span>📅 <span id="eventCount">0</span> 個事件</span>
+    <span>🌍 <span id="placeCount">0</span> 個地點</span>
+    <span>⏳ <span id="yearCount">0</span> 年旅程</span>
+  </div>
+</header>
+
+<!-- Filter -->
+<nav class="filter-bar">
+  <button class="chip active" data-type="all">全部</button>
+  <button class="chip" data-type="event">🎯 人生大事</button>
+  <button class="chip" data-type="travel">✈️ 旅行地點</button>
+  <button class="chip" data-type="achievement">🏆 個人成就</button>
+</nav>
+
+<!-- Timeline -->
+<main class="timeline-wrap">
+  <div class="timeline-line"></div>
+  <div id="timelineContent"></div>
+</main>
+
+<footer class="page-footer">
+  每一個當下都值得被記得 · 持續更新中
+</footer>
+
+<button id="backTop" title="回到頂部">↑</button>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-icon" id="mIcon"></div>
+    <div class="modal-date" id="mDate"></div>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-image" id="mImage"></div>
+    <div class="modal-desc" id="mDesc"></div>
+    <div class="modal-meta" id="mMeta"></div>
+  </div>
+</div>
+
+<script>
+// ── 事件資料 ── 請在這裡填入你的人生事件
+const events = [
+  // === 童年 ===
+  {
+    era: "childhood", year: 2000, month: 1,
+    type: "event", icon: "👶",
+    title: "出生",
+    description: "在台灣呱呱落地，開始了這段奇妙的旅程。",
+    location: "台灣", habit: "睡覺、喝奶", image: null
+  },
+  {
+    era: "childhood", year: 2003, month: 9,
+    type: "event", icon: "🎒",
+    title: "上幼稚園",
+    description: "第一次離開家裡，認識了人生中的第一批朋友。",
+    location: "台灣", habit: "玩積木、畫畫", image: null
+  },
+  {
+    era: "childhood", year: 2006, month: 9,
+    type: "event", icon: "📚",
+    title: "國小入學",
+    description: "背著大書包走進校園，開始正式的學習生涯。",
+    location: "台灣", habit: "看卡通、騎腳踏車", image: null
+  },
+  // === 求學 ===
+  {
+    era: "study", year: 2012, month: 9,
+    type: "event", icon: "🏫",
+    title: "國中入學",
+    description: "升上國中，開始面對更多挑戰與考試。",
+    location: "台灣", habit: "打電動、和朋友出去", image: null
+  },
+  {
+    era: "study", year: 2014, month: 7,
+    type: "travel", icon: "✈️",
+    title: "第一次出國",
+    description: "人生第一次出國旅行，對世界的好奇心從這裡開始。",
+    location: "日本", habit: "拍照、買紀念品", image: null
+  },
+  {
+    era: "study", year: 2015, month: 9,
+    type: "event", icon: "🎓",
+    title: "高中入學",
+    description: "進入高中，開始思考未來的方向。",
+    location: "台灣", habit: "念書、社團活動", image: null
+  },
+  {
+    era: "study", year: 2017, month: 6,
+    type: "achievement", icon: "🏆",
+    title: "第一個重要成就",
+    description: "努力的成果終於被看見，這份喜悅永遠記得。",
+    location: "台灣", habit: "準備比賽、練習", image: null
+  },
+  // === 成長 ===
+  {
+    era: "growth", year: 2018, month: 9,
+    type: "event", icon: "🎓",
+    title: "大學入學",
+    description: "開始了大學生活，第一次真正獨立生活。",
+    location: "台灣", habit: "社團、打工、交朋友", image: null
+  },
+  {
+    era: "growth", year: 2019, month: 8,
+    type: "travel", icon: "🌏",
+    title: "東南亞旅行",
+    description: "背包旅行，用雙腳感受不同文化的魅力。",
+    location: "東南亞", habit: "探索、嘗試新食物", image: null
+  },
+  {
+    era: "growth", year: 2020, month: 3,
+    type: "event", icon: "😷",
+    title: "疫情時代",
+    description: "全球疫情改變了生活方式，學會了在家工作與學習。",
+    location: "台灣", habit: "看影集、學新技能", image: null
+  },
+  // === 現在 ===
+  {
+    era: "now", year: 2022, month: 7,
+    type: "event", icon: "💼",
+    title: "開始工作",
+    description: "踏入職場，把所學轉換為實際的貢獻。",
+    location: "台灣", habit: "下班後運動、學習新技術", image: null
+  },
+  {
+    era: "now", year: 2024, month: 4,
+    type: "achievement", icon: "🌟",
+    title: "重要里程碑",
+    description: "這一年完成了一個讓自己驕傲的目標。",
+    location: "台灣", habit: "規律作息、持續成長", image: null
+  },
+  {
+    era: "now", year: 2026, month: 7,
+    type: "event", icon: "📖",
+    title: "製作人生時間軸",
+    description: "回顧走過的路，把每一個珍貴的記憶留存下來。",
+    location: "台灣", habit: "寫程式、記錄生活", image: null
+  },
+];
+
+// 年代設定
+const eras = {
+  childhood: { label: "童年", emoji: "🌱", years: "" },
+  study:     { label: "求學",  emoji: "📖", years: "" },
+  growth:    { label: "成長",  emoji: "🌿", years: "" },
+  now:       { label: "現在",  emoji: "✨", years: "" },
+};
+
+// 計算年代年份範圍
+const eraYears = {};
+events.forEach(e => {
+  if (!eraYears[e.era]) eraYears[e.era] = { min: e.year, max: e.year };
+  eraYears[e.era].min = Math.min(eraYears[e.era].min, e.year);
+  eraYears[e.era].max = Math.max(eraYears[e.era].max, e.year);
+});
+Object.keys(eraYears).forEach(k => {
+  const r = eraYears[k];
+  eras[k].years = r.min === r.max ? `${r.min}` : `${r.min} – ${r.max}`;
+});
+
+const typeLabel = { event: "人生大事", travel: "旅行", achievement: "成就" };
+
+function buildTimeline() {
+  const container = document.getElementById('timelineContent');
+  let lastEra = null;
+
+  events.forEach((ev, i) => {
+    if (ev.era !== lastEra) {
+      lastEra = ev.era;
+      const era = eras[ev.era] || { label: ev.era, emoji: "📌", years: "" };
+      const h = document.createElement('div');
+      h.className = 'era-header';
+      h.innerHTML = `
+        <span class="era-label">${era.emoji} ${era.label}</span>
+        <span class="era-years">${era.years}</span>
+        <div class="era-line"></div>
+      `;
+      container.appendChild(h);
+    }
+
+    const card = document.createElement('div');
+    card.className = `event-card`;
+    card.dataset.type = ev.type;
+    card.dataset.index = i;
+
+    const imageHtml = ev.image
+      ? `<div class="card-image"><img src="${ev.image}" alt="${ev.title}"></div>`
+      : '';
+
+    card.innerHTML = `
+      <div class="dot-col">
+        <div class="dot type-${ev.type}"></div>
+      </div>
+      <div class="card-body type-${ev.type}">
+        <div class="card-top">
+          <span class="card-icon">${ev.icon}</span>
+          <span class="card-date">${ev.year}年${ev.month}月</span>
+          <span class="card-tag type-${ev.type}">${typeLabel[ev.type]}</span>
+        </div>
+        ${imageHtml}
+        <div class="card-title">${ev.title}</div>
+        <div class="card-desc">${ev.description}</div>
+        <div class="card-footer">
+          <span class="card-location">📍 ${ev.location}</span>
+          ${ev.habit ? `<span class="card-habit">那時最常：${ev.habit}</span>` : ''}
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => openModal(i));
+    container.appendChild(card);
+  });
+
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('eventCount').textContent = events.length;
+  const places = new Set(events.map(e => e.location)).size;
+  document.getElementById('placeCount').textContent = places;
+  const minYear = Math.min(...events.map(e => e.year));
+  const maxYear = Math.max(...events.map(e => e.year));
+  document.getElementById('yearCount').textContent = maxYear - minYear;
+}
+
+// IntersectionObserver 進場動畫
+function initAnimations() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.event-card').forEach(c => obs.observe(c));
+}
+
+// 篩選
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const type = chip.dataset.type;
+    document.querySelectorAll('.event-card').forEach(card => {
+      const match = type === 'all' || card.dataset.type === type;
+      card.classList.toggle('hidden', !match);
+      if (match && !card.classList.contains('visible')) {
+        setTimeout(() => card.classList.add('visible'), 50);
+      }
+    });
+  });
+});
+
+// Modal
+function openModal(i) {
+  const ev = events[i];
+  document.getElementById('mIcon').textContent = ev.icon;
+  document.getElementById('mDate').textContent = `${ev.year}年${ev.month}月 · ${typeLabel[ev.type]}`;
+  document.getElementById('mTitle').textContent = ev.title;
+  document.getElementById('mDesc').textContent = ev.description;
+
+  const imgEl = document.getElementById('mImage');
+  if (ev.image) {
+    imgEl.innerHTML = `<img src="${ev.image}" alt="${ev.title}">`;
+    imgEl.style.display = 'flex';
+  } else {
+    imgEl.style.display = 'none';
+  }
+
+  const metaEl = document.getElementById('mMeta');
+  metaEl.innerHTML = `
+    <div class="modal-meta-item"><span>地點</span>📍 ${ev.location}</div>
+    ${ev.habit ? `<div class="modal-meta-item"><span>那時最常做的事</span>${ev.habit}</div>` : ''}
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// 回到頂部
+const backTop = document.getElementById('backTop');
+window.addEventListener('scroll', () => {
+  backTop.classList.toggle('show', window.scrollY > 300);
+});
+backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// 初始化
+buildTimeline();
+initAnimations();
+</script>
+</body>
+</html>
