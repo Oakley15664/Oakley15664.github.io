@@ -128,9 +128,9 @@
 <div class="stats-bar">
   <div class="stat-card"><div class="stat-label">本月可出勤上班日</div><div class="stat-value">11</div><div class="stat-note">9/14 起</div></div>
   <div class="stat-card"><div class="stat-label">本月可出勤時數</div><div class="stat-value">22</div><div class="stat-note">9/14 起</div></div>
-  <div class="stat-card muted"><div class="stat-label">9/13 前已完成</div><div class="stat-value">6</div><div class="stat-note">已計入累積</div></div>
+  <div class="stat-card muted"><div class="stat-label">9/13 前已完成</div><div class="stat-value">11</div><div class="stat-note">已計入累積</div></div>
   <div class="stat-card"><div class="stat-label">本月需出勤時數</div><div class="stat-value">25</div><div class="stat-note">目標</div></div>
-  <div class="stat-card accent"><div class="stat-label">本月累積時數</div><div class="stat-value" id="statHours">6</div><div class="stat-note" id="statNote">還差 19 小時</div></div>
+  <div class="stat-card accent"><div class="stat-label">本月累積時數</div><div class="stat-value" id="statHours">11</div><div class="stat-note" id="statNote">還差 14 小時</div></div>
 </div>
 
 <div id="scheduleContainer"></div>
@@ -147,7 +147,7 @@
 <script>
 const HOLIDAYS = { 25:'中秋節', 28:'教師節' };
 const START_DAY = 14;      // 9/14 才開始排班
-const PRE_HOURS = 6;       // 9/13（日）之前已完成的時數
+const PRE_HOURS = 11;      // 9/13（日）之前已完成的時數
 const TARGET_HOURS = 25;   // 本月需出勤時數
 const SLOTS = [
   { name:'早上', time:'7:00-8:00',   noon: true },
