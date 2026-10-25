@@ -126,8 +126,8 @@
 </div>
 
 <div class="stats-bar">
-  <div class="stat-card"><div class="stat-label">本月可出勤上班日</div><div class="stat-value">20</div><div class="stat-note">扣除 1 天校慶紀念日</div></div>
-  <div class="stat-card"><div class="stat-label">本月可出勤時數</div><div class="stat-value">40</div><div class="stat-note">每天 2 個時段</div></div>
+  <div class="stat-card"><div class="stat-label">本月可出勤上班日</div><div class="stat-value">21</div><div class="stat-note">11/2 校慶照常上班</div></div>
+  <div class="stat-card"><div class="stat-label">本月可出勤時數</div><div class="stat-value">42</div><div class="stat-note">每天 2 個時段</div></div>
   <div class="stat-card"><div class="stat-label">本月需出勤時數</div><div class="stat-value">25</div><div class="stat-note">目標</div></div>
   <div class="stat-card accent"><div class="stat-label">本月累積時數</div><div class="stat-value" id="statHours">0</div><div class="stat-note" id="statNote">還差 25 小時</div></div>
 </div>
@@ -143,7 +143,8 @@
 </div>
 
 <script>
-const HOLIDAYS = { 2:'校慶紀念日' };
+const HOLIDAYS = {};
+const NOTES = { 2:'校慶紀念日（停課、照常上班）' };   // 照常排班，只加註
 const START_DAY = 1;       // 整月皆可排班
 const PRE_HOURS = 0;       // 本月之前沒有累積時數
 const TARGET_HOURS = 25;   // 本月需出勤時數
@@ -218,6 +219,7 @@ function render() {
       const cls = 'cell c-date' + (kind === 'open' ? '' : ' ' + kind);
       let note = WD_NAMES[di];
       if (kind === 'hol') note += ' · ' + HOLIDAYS[day];
+      else if (kind === 'open' && NOTES[day]) note += ' · ' + NOTES[day];
       else if (kind === 'pre') note += ' · 未開始';
       const html = kind === 'emp' ? '' : `11/${day}<span class="wd">${note}</span>`;
       const c = mk('div', cls, html);
