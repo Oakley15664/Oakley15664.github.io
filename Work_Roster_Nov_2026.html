@@ -102,6 +102,7 @@
   .c-mo-total { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 700; color: var(--white); background: var(--orange); }
 
   .legend { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-top: 20px; font-size: 11px; color: var(--gray); }
+  .remark { margin-top: 14px; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; color: var(--gray); }
   .legend-item { display: flex; align-items: center; gap: 6px; }
   .ldot { width: 13px; height: 13px; border-radius: 3px; }
   .print-btn { background: var(--orange); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-family: 'Noto Sans TC', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
@@ -126,8 +127,8 @@
 </div>
 
 <div class="stats-bar">
-  <div class="stat-card"><div class="stat-label">本月可出勤上班日</div><div class="stat-value">20</div><div class="stat-note">扣除 11/13 排休</div></div>
-  <div class="stat-card"><div class="stat-label">本月可出勤時數</div><div class="stat-value">40</div><div class="stat-note">每天 2 個時段</div></div>
+  <div class="stat-card"><div class="stat-label">本月可出勤上班日</div><div class="stat-value">21</div><div class="stat-note">11/2 校慶照常上班</div></div>
+  <div class="stat-card"><div class="stat-label">本月可出勤時數</div><div class="stat-value">42</div><div class="stat-note">每天 2 個時段</div></div>
   <div class="stat-card"><div class="stat-label">本月需出勤時數</div><div class="stat-value">25</div><div class="stat-note">目標</div></div>
   <div class="stat-card accent"><div class="stat-label">本月累積時數</div><div class="stat-value" id="statHours">0</div><div class="stat-note" id="statNote">還差 25 小時</div></div>
 </div>
@@ -142,8 +143,10 @@
   <div class="legend-item"><div class="ldot" style="background:#f2f2f2;border:1px solid #ddd;"></div>空白</div>
 </div>
 
+<div class="remark">備註：11/13（五）排休</div>
+
 <script>
-const HOLIDAYS = { 13:'排休' };
+const HOLIDAYS = {};
 const NOTES = { 2:'校慶紀念日（停課、照常上班）' };   // 照常排班，只加註
 const START_DAY = 1;       // 整月皆可排班
 const PRE_HOURS = 0;       // 本月之前沒有累積時數
